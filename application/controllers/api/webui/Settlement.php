@@ -10,8 +10,10 @@ class Settlement extends REST_Controller
     function __construct()
     {
         parent::__construct();
-        $this->load->model('interface_model');
+        $this->load->library('wsdl_controller');
         $this->load->library('keys_controller');
+        $this->load->model('interface_model');
+        $this->load->model('midware_model');
     }
 
     public function _get_auth()
