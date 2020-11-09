@@ -20,7 +20,7 @@ class Fidocpostadv extends REST_Controller
     public function index_post()
     {
         $data   = $this->post();
-        $code   = $data['AdvanceRequestDetails']['BasicDetails']['AdvanceNo'];
+        $code   = $data['AdvanceRequest']['AdvanceRequestDetails']['BasicDetails']['AdvanceNo'];
         $jwt = $this->input->get_request_header('Authorization');
         try {
             $result = $this->keys_controller->_check_keys($jwt);
@@ -44,7 +44,7 @@ class Fidocpostadv extends REST_Controller
         $mode   = 'SAP_FIPOST';
         $modes  = 'SCM_FIGET';
         $data   = $this->post();
-        $code   = $data['AdvanceRequestDetails']['BasicDetails']['AdvanceNo'];
+        $code   = $data['AdvanceRequest']['AdvanceRequestDetails']['BasicDetails']['AdvanceNo'];
         $params = $this->fi_postca->_array_sap($data);
         $frontend_text  = json_encode($data, true);
         $backend_text   = json_encode($params, true);

@@ -5,14 +5,14 @@ class FI_Postca
 {
     public function _array_sap($data)
     {
-        $Period     = substr($data['AdvanceRequestDetails']['BasicDetails']['FinalizationDate'], 4, 2);
-        $items = $data['AdvanceRequestDetails']['AdvancePostingDetails']['AdvancePosting'];
+        $Period     = substr($data['AdvanceRequest']['AdvanceRequestDetails']['BasicDetails']['FinalizationDate'], 4, 2);
+        $items = $data['AdvanceRequest']['AdvanceRequestDetails']['AdvancePostingDetails']['AdvancePosting'];
 
         $no_acc = 0;
         foreach ($items as $k => $v) {
             $no_acc++;
 
-            $office_code = $this->_office_code($data['AdvanceRequestDetails']['BasicDetails']['BaseOffice']['Code']);
+            $office_code = $this->_office_code($data['AdvanceRequest']['AdvanceRequestDetails']['BasicDetails']['BaseOffice']['Code']);
             if ($office_code == 'IBTO') {
                 $doc_type = 'ZL';
             } else {
@@ -36,21 +36,21 @@ class FI_Postca
             $inputdetail[] = array(
                 'LgcBelnr'      => '1',
                 'LgcBuzei'      => $no_acc,
-                'Bldat'         => nice_date($data['AdvanceRequestDetails']['BasicDetails']['Date'], 'Y-m-d'),
+                'Bldat'         => nice_date($data['AdvanceRequest']['AdvanceRequestDetails']['BasicDetails']['Date'], 'Y-m-d'),
                 'Blart'         => $doc_type,
-                'Budat'         => nice_date($data['AdvanceRequestDetails']['BasicDetails']['FinalizationDate'], 'Y-m-d'),
+                'Budat'         => nice_date($data['AdvanceRequest']['AdvanceRequestDetails']['BasicDetails']['FinalizationDate'], 'Y-m-d'),
                 'Monat'         => $Period,
                 'Waers'         => $items[$k]['AccountCurrency'],
-                'Xblnr'         => $data['AdvanceRequestDetails']['BasicDetails']['AdvanceNo'],
-                'Bktxt'         => $data['AdvanceRequestDetails']['BasicDetails']['Remark'],
+                'Xblnr'         => $data['AdvanceRequest']['AdvanceRequestDetails']['BasicDetails']['AdvanceNo'],
+                'Bktxt'         => $data['AdvanceRequest']['AdvanceRequestDetails']['BasicDetails']['AdvanceNo'],
                 'Bukrs'         => $office_code,
                 'Hkont'         => $items[$k]['AccountPostingCode'],
                 'Wrbtr'         => $amount,
-                'Valut'         => nice_date($data['AdvanceRequestDetails']['BasicDetails']['FinalizationDate'], 'Y-m-d'),
+                'Valut'         => nice_date($data['AdvanceRequest']['AdvanceRequestDetails']['BasicDetails']['FinalizationDate'], 'Y-m-d'),
                 'Prctr'         => '',
                 'Kostl'         => '',
-                'Zuonr'         => $data['AdvanceRequestDetails']['BasicDetails']['AdvanceNo'],
-                'Sgtxt'         => $data['AdvanceRequestDetails']['BasicDetails']['Remark'],
+                'Zuonr'         => $data['AdvanceRequest']['AdvanceRequestDetails']['BasicDetails']['AdvanceNo'],
+                'Sgtxt'         => $data['AdvanceRequest']['AdvanceRequestDetails']['BasicDetails']['AdvanceNo'],
                 'Shkzg'         => $Shkzg,
                 'Lifnr'         => '',
                 'Kunnr'         => '',
