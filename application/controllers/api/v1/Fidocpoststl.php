@@ -32,9 +32,10 @@ class Fidocpoststl extends REST_Controller
                 'Response' => array(
                     'Message' => 'Access denied',
                     'RefId' => $code,
-                    'Status' => 'E'
-                ), 400
-            ));
+                    'Status' => 'Fail',
+                    'StatusCode' => 401
+                )
+            ), REST_Controller::HTTP_UNAUTHORIZED);
         }
     }
 
@@ -60,14 +61,14 @@ class Fidocpoststl extends REST_Controller
         $this->form_validation->set_rules('Hkont', 'Account Posting Code', 'required');
 
         if ($this->form_validation->run() == FALSE) {
-            $result = validation_errors();
             $this->response(array(
                 'Response' => array(
                     'Message' => preg_replace('/<p>(.*?)<\/p>/', '$1', validation_errors()),
                     'RefId' => $code,
-                    'Status' => 'E'
+                    'Status' => 'Fail',
+                    'StatusCode' => 400
                 )
-            ), 400);
+            ), REST_Controller::HTTP_BAD_REQUEST);
         } else {
 
             #Call Operation (Function). Catch and display any errors
@@ -78,14 +79,14 @@ class Fidocpoststl extends REST_Controller
             $result = $this->wsdl_controller->_sap_wsdl($wsdl, $function, $username, $password, $params);
 
             if ($result['status'] == 'E') {
-
                 $this->response(array(
                     'Response' => array(
                         'Message' => $result['message'],
                         'RefId' => $code,
-                        'Status' => 'E'
-                    ), 500
-                ));
+                        'Status' => 'Fail',
+                        'StatusCode' => 500
+                    )
+                ), REST_Controller::HTTP_INTERNAL_SERVER_ERROR);
                 $this->midware_model->insert_tb_interface($code, $result['message'], $frontend_text, $backend_text, $type, $mode);
             } else {
 
@@ -93,14 +94,14 @@ class Fidocpoststl extends REST_Controller
 
                 if ($Code) {
                     $Return     = $result['message']['Return']['item']['Message'];
-
                     $this->response(array(
                         'Response' => array(
                             'Message' => $Return,
                             'RefId' => $code,
-                            'Status' => 'S'
-                        ), 200
-                    ));
+                            'Status' => 'Success',
+                            'StatusCode' => 200
+                        )
+                    ), REST_Controller::HTTP_OK);
                     $this->midware_model->insert_tb_success($code, $Return, $type);
                     $this->db->delete('tb_interfaces', array("code" => $code));
 
@@ -115,14 +116,14 @@ class Fidocpoststl extends REST_Controller
                         $message[] = $Return[$r]['Message'];
                     }
                     $JMessages = json_encode($message, true);
-
                     $this->response(array(
                         'Response' => array(
                             'Message' => $message,
                             'RefId' => $code,
-                            'Status' => 'E'
-                        ), 204
-                    ));
+                            'Status' => 'Fail',
+                            'StatusCode' => 400
+                        )
+                    ), REST_Controller::HTTP_BAD_REQUEST);
                     $this->midware_model->insert_tb_interface($code, $JMessages, $frontend_text, $backend_text, $type, $mode);
                 }
             }
@@ -162,14 +163,14 @@ class Fidocpoststl extends REST_Controller
 
             if ($Code) {
                 $Return     = $result['message']['Return']['item']['Message'];
-
                 $this->response(array(
                     'Response' => array(
                         'Message' => $Return,
                         'RefId' => $code,
-                        'Status' => 'S'
-                    ), 200
-                ));
+                        'Status' => 'Success',
+                        'StatusCode' => 200
+                    )
+                ), REST_Controller::HTTP_OK);
                 $this->midware_model->insert_tb_success($code, $Return, $type);
                 $this->db->delete('tb_interfaces', array("code" => $code));
             } else {
@@ -179,14 +180,14 @@ class Fidocpoststl extends REST_Controller
                     $message[] = $Return[$r]['Message'];
                 }
                 $JMessages = json_encode($message, true);
-
                 $this->response(array(
                     'Response' => array(
                         'Message' => $message,
                         'RefId' => $code,
-                        'Status' => 'E'
-                    ), 204
-                ));
+                        'Status' => 'Fail',
+                        'StatusCode' => 400
+                    )
+                ), REST_Controller::HTTP_BAD_REQUEST);
                 $this->midware_model->insert_tb_interface($code, $JMessages, $frontend_text, $backend_text, $type, $mode);
             }
         }
