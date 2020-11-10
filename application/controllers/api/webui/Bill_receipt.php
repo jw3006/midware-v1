@@ -290,13 +290,14 @@ class Bill_receipt extends REST_Controller
                 );
             } else {
                 $data_put = array(
-                    'receiver_name'      => $data['receiver_name'],
-                    'receiver_date'      => $data['receiver_date'],
-                    'status'      => 'Completed',
-                    'modified'       => date('Y-m-d H:i:s'),
-                    'modified_by'    => $data['created_by']
+                    'receiver_name' => $data['receiver_name'],
+                    'receiver_date' => $data['receiver_date'],
+                    'status'        => 'Completed',
+                    'modified'      => date('Y-m-d H:i:s'),
+                    'modified_by'   => $data['created_by']
                 );
             }
+
             $update = $this->db->where('code', $data['code'])
                 ->update('tb_app_receipt', $data_put);
             if ($update) {
@@ -307,6 +308,9 @@ class Bill_receipt extends REST_Controller
                 ], REST_Controller::HTTP_OK);
                 if ($data['type'] == 'received') {
                     /* Update Baseline Date SAP */
+                    $detail = $this->db->get_where('tb_app_receipt_items', ['code' => $data['code']])->result();
+                    $details = json_decode(json_encode($detail), true);
+                    $this->_post_sap($details, $data['receiver_date']);
                 }
             } else {
                 $this->response([
@@ -402,5 +406,29 @@ class Bill_receipt extends REST_Controller
                 'data' => ''
             ], REST_Controller::HTTP_BAD_REQUEST);
         }
+    }
+
+    private function _post_sap($detail, $Zfbdt)
+    {
+        foreach ($detail as $k => $v) {
+            $this->db->select('inv_year, company_code');
+            $oc = $this->db->get_where('tb_app_receipt', ['code' => $detail[$k]['code']])->row_array();
+
+            $params = array(
+                'Belnr' => $detail[$k]['sap_reference'],
+                'Bukrs' => $oc['company_code'],
+                'Buzei' => '1',
+                'Gjahr' => $oc['inv_year'],
+                'Zfbdt' => $Zfbdt
+            );
+
+            #Call Operation (Function). Catch and display any errors
+            $wsdl = 'http://PBBs4hdap00.ic4sap.bluebirdgroup.com:8000/sap/bc/srt/wsdl/flv_10002A111AD1/bndg_url/sap/bc/srt/rfc/sap/yfi_update_cust_bldate/320/yser_update_cust_bldate/ybin_update_cust_bldate?sap-client=320';
+            $function = 'YfwsUpdateCustBldate';
+            $username = 'HR-ABAP01';
+            $password = '123456789';
+            $result = $this->wsdl_controller->_sap_wsdl($wsdl, $function, $username, $password, $params);
+        }
+        return $params;
     }
 }

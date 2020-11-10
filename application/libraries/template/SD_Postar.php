@@ -15,6 +15,13 @@ class SD_Postar
             $doc_type = 'ZT';
         }
 
+        $cc['CompanyCode'] = $office_code; //sample
+        $cc['OfficeCode']  = $data['Invoices']['InvoiceInfo']['Office']; //sample
+        $cc['ServiceCode'] = $data['Invoices']['InvoiceInfo']['JobSummary']['JobSummaryInfo']['JobType']; //sample
+        $cc['VehicleCode'] = 'BOX'; //sample
+        $profit_center = $this->_profit_center($cc);
+
+
         if ($data['Invoices']['InvoiceInfo']['AmountSummary']['BillingInvoiceCurrency'] == 'IDR') {
             $amount_head = number_format($data['Invoices']['InvoiceInfo']['AmountSummary']['GrandInvoiceAmount'], 2, ".", "") / 100;
         } else {
@@ -71,12 +78,6 @@ class SD_Postar
         $no_acc = 1;
         foreach ($items_ar as $k => $v) {
             $no_acc++;
-
-            $cc['CompanyCode'] = $office_code; //sample
-            $cc['OfficeCode']  = $data['Invoices']['InvoiceInfo']['Office']; //sample
-            $cc['ServiceCode'] = $data['Invoices']['InvoiceInfo']['JobSummary']['JobSummaryInfo']['JobType']; //sample
-            $cc['VehicleCode'] = 'BOX'; //sample
-            $profit_center = $this->_profit_center($cc);
 
             if ($data['Invoices']['InvoiceInfo']['AmountSummary']['BillingInvoiceCurrency'] == 'IDR') {
                 $amount = number_format($items_ar[$k]['ChargeAmount'], 2, ".", "") / 100;
@@ -214,6 +215,12 @@ class SD_Postar
             $doc_type = 'ZT';
         }
 
+        $cc['CompanyCode'] = $office_code; //sample
+        $cc['OfficeCode']  = $data['Invoices']['InvoiceInfo']['Office']; //sample
+        $cc['ServiceCode'] = $data['Invoices']['InvoiceInfo']['JobSummary']['JobSummaryInfo']['JobType']; //sample
+        $cc['VehicleCode'] = 'BOX'; //sample
+        $profit_center = $this->_profit_center($cc);
+
         if ($data['Invoices']['InvoiceInfo']['AmountSummary']['BillingInvoiceCurrency'] == 'IDR') {
             $amount_head = number_format($data['Invoices']['InvoiceInfo']['AmountSummary']['GrandInvoiceAmount'], 2, ".", "") / 100;
         } else {
@@ -267,14 +274,6 @@ class SD_Postar
         );
         //======================================================================
         //==========Detail Revenue =============================================
-
-
-        $cc['CompanyCode'] = $office_code; //sample
-        $cc['OfficeCode']  = $data['Invoices']['InvoiceInfo']['Office']; //sample
-        $cc['ServiceCode'] = $data['Invoices']['InvoiceInfo']['JobSummary']['JobSummaryInfo']['JobType']; //sample
-        $cc['VehicleCode'] = 'BOX'; //sample
-        $profit_center = $this->_profit_center($cc);
-
         if ($data['Invoices']['InvoiceInfo']['AmountSummary']['BillingInvoiceCurrency'] == 'IDR') {
             $amount = number_format($items_ar['ChargeAmount'], 2, ".", "") / 100;
         } else {
