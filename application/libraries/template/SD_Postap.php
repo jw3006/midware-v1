@@ -8,6 +8,7 @@ class SD_Postap
         $Period     = substr($data['Invoices']['InvoiceInfo']['PostedOn'], 4, 2);
         $items_ap = $data['Invoices']['InvoiceInfo']['Charges']['ChargeInfo'];
 
+        //==========Detail Cost AP ==================================================
         $no_acc = 0;
         foreach ($items_ap as $k => $v) {
             $no_acc++;
@@ -48,7 +49,7 @@ class SD_Postap
                 'Prctr'         => '',
                 'Kostl'         => $cost_center,
                 'Zuonr'         => $data['Invoices']['InvoiceInfo']['InvoiceNo'],
-                'Sgtxt'         => 'Detail Teks',
+                'Sgtxt'         => '',
                 'Shkzg'         => 'S',
                 'Lifnr'         => '',
                 'Kunnr'         => '',
@@ -77,7 +78,8 @@ class SD_Postap
             );
         }
 
-
+        //======================================================================
+        //==========Detail VAT =================================================
         foreach ($items_ap as $p => $v) {
             if ($items_ap[$p]['ChargeTaxes']['ChargeTaxInfo']['TaxBillingAmount'] > 0) {
                 $no_acc++;
@@ -105,7 +107,7 @@ class SD_Postap
                     'Prctr'         => '',
                     'Kostl'         => '',
                     'Zuonr'         => $data['Invoices']['InvoiceInfo']['InvoiceNo'],
-                    'Sgtxt'         => 'Vat - In',
+                    'Sgtxt'         => '',
                     'Shkzg'         => 'S',
                     'Lifnr'         => '',
                     'Kunnr'         => '',
@@ -135,6 +137,8 @@ class SD_Postap
             }
         }
 
+        //======================================================================
+        //==========Detail AP ==================================================
         if ($data['Invoices']['InvoiceInfo']['AmountSummary']['BillingInvoiceCurrency'] == 'IDR') {
             $amount_head = number_format($data['Invoices']['InvoiceInfo']['AmountSummary']['GrandInvoiceAmount'], 2, ".", "") / 100;
         } else {
@@ -158,7 +162,7 @@ class SD_Postap
             'Prctr'         => '',
             'Kostl'         => '',
             'Zuonr'         => $data['Invoices']['InvoiceInfo']['InvoiceNo'],
-            'Sgtxt'         => 'Tex_Head',
+            'Sgtxt'         => '',
             'Shkzg'         => 'H',
             'Lifnr'         => $data['Invoices']['InvoiceInfo']['Vendor']['Code'],
             'Kunnr'         => '',
@@ -185,6 +189,202 @@ class SD_Postap
             ' Field'    => '',
             ' System'   => ''
         );
+        //======================================================================
+
+        $inputdetail = array_merge($inputAP, $inputTax, $inputHd);
+        $inputT = array_merge($inputTAP, $inputTTax, $inputTHd);
+
+        $item = array('item'  => $inputdetail);
+        $itemT = array('item' => $inputT);
+        $params = array(
+            'Fitrxlgc'  => $item,
+            'Return'    => $itemT,
+            'Test'      => ''
+        );
+
+        return $params;
+    }
+
+    public function _array_sap1($data)
+    {
+        $Period     = substr($data['Invoices']['InvoiceInfo']['PostedOn'], 4, 2);
+        $items_ap = $data['Invoices']['InvoiceInfo']['Charges']['ChargeInfo'];
+
+
+        $office_code = $this->_office_code($data['Invoices']['InvoiceInfo']['Office']);
+        if ($office_code == 'IBTO') {
+            $doc_type = 'ZL';
+        } else {
+            $doc_type = 'ZT';
+        }
+
+        $cc['CompanyCode'] = $office_code; //sample
+        $cc['OfficeCode'] = $data['Invoices']['InvoiceInfo']['Office']; //sample
+        $cc['ServiceCode'] = $data['Invoices']['InvoiceInfo']['JobSummary']['JobSummaryInfo']['JobType']; //sample
+        $cc['VehicleCode'] = 'BOX'; //sample
+        $cost_center = $this->_cost_center($cc);
+
+        if ($data['Invoices']['InvoiceInfo']['AmountSummary']['BillingInvoiceCurrency'] == 'IDR') {
+            $amount = number_format($items_ap['ChargeAmount'], 2, ".", "") / 100;
+        } else {
+            $amount = number_format($items_ap['ChargeAmount'], 2, ".", "");
+        }
+
+        //==========Detail Cost AP ==================================================
+        $inputAP[] = array(
+            'LgcBelnr'      => '1',
+            'LgcBuzei'      => '1',
+            'Bldat'         => nice_date($data['Invoices']['InvoiceInfo']['InvoiceDate'], 'Y-m-d'),
+            'Blart'         => $doc_type,
+            'Budat'         => nice_date($data['Invoices']['InvoiceInfo']['PostedOn'], 'Y-m-d'),
+            'Monat'         => $Period,
+            'Waers'         => $data['Invoices']['InvoiceInfo']['AmountSummary']['BillingInvoiceCurrency'],
+            'Xblnr'         => $data['Invoices']['InvoiceInfo']['InvoiceNo'],
+            'Bktxt'         => $data['Invoices']['InvoiceInfo']['JobSummary']['JobSummaryInfo']['JobNumber'],
+            'Bukrs'         => $office_code,
+            'Hkont'         => $items_ap['PostingCode'],
+            'Wrbtr'         => $amount,
+            'Valut'         => nice_date($data['Invoices']['InvoiceInfo']['PostedOn'], 'Y-m-d'),
+            'Prctr'         => '',
+            'Kostl'         => $cost_center,
+            'Zuonr'         => $data['Invoices']['InvoiceInfo']['InvoiceNo'],
+            'Sgtxt'         => '',
+            'Shkzg'         => 'S',
+            'Lifnr'         => '',
+            'Kunnr'         => '',
+            'RefLgcBelnr'   => '',
+            'FiBelnr'       => '',
+            'FiGjahr'       => '',
+            'Umskz'         => '',
+            'RefKey1'       => '40'
+        );
+
+        $inputTAP[] = array(
+            ' Type'     => '',
+            ' Id'       => '',
+            ' Number'   => '',
+            ' Message'  => '',
+            ' LogNo'    => '',
+            ' LogMsgNo' => '',
+            ' MessageV1' => '',
+            ' MessageV2' => '',
+            ' MessageV3' => '',
+            ' MessageV4' => '',
+            ' Parameter' => '',
+            ' Row'      => '',
+            ' Field'    => '',
+            ' System'   => ''
+        );
+
+        //======================================================================
+        //==========Detail VAT =================================================
+        if ($items_ap['ChargeTaxes']['ChargeTaxInfo']['TaxBillingAmount'] > 0) {
+
+            if ($data['Invoices']['InvoiceInfo']['AmountSummary']['BillingInvoiceCurrency'] == 'IDR') {
+                $amount_tax = number_format($items_ap['ChargeTaxes']['ChargeTaxInfo']['TaxBillingAmount'], 2, ".", "") / 100;
+            } else {
+                $amount_tax = number_format($items_ap['ChargeTaxes']['ChargeTaxInfo']['TaxBillingAmount'], 2, ".", "");
+            }
+
+            $inputTax[] = array(
+                'LgcBelnr'      => '1',
+                'LgcBuzei'      => '2',
+                'Bldat'         => nice_date($data['Invoices']['InvoiceInfo']['InvoiceDate'], 'Y-m-d'),
+                'Blart'         => $doc_type,
+                'Budat'         => nice_date($data['Invoices']['InvoiceInfo']['PostedOn'], 'Y-m-d'),
+                'Monat'         => $Period,
+                'Waers'         => $data['Invoices']['InvoiceInfo']['AmountSummary']['BillingInvoiceCurrency'],
+                'Xblnr'         => $data['Invoices']['InvoiceInfo']['InvoiceNo'],
+                'Bktxt'         => $data['Invoices']['InvoiceInfo']['JobSummary']['JobSummaryInfo']['JobNumber'],
+                'Bukrs'         => $office_code,
+                'Hkont'         => $items_ap['ChargeTaxes']['ChargeTaxInfo']['TaxAccountMapped'],
+                'Wrbtr'         => $amount_tax,
+                'Valut'         => nice_date($data['Invoices']['InvoiceInfo']['PostedOn'], 'Y-m-d'),
+                'Prctr'         => '',
+                'Kostl'         => '',
+                'Zuonr'         => $data['Invoices']['InvoiceInfo']['InvoiceNo'],
+                'Sgtxt'         => '',
+                'Shkzg'         => 'S',
+                'Lifnr'         => '',
+                'Kunnr'         => '',
+                'RefLgcBelnr'   => '',
+                'FiBelnr'       => '',
+                'FiGjahr'       => '',
+                'Umskz'         => '',
+                'RefKey1'       => '40'
+            );
+
+            $inputTTax[] = array(
+                ' Type'     => '',
+                ' Id'       => '',
+                ' Number'   => '',
+                ' Message'  => '',
+                ' LogNo'    => '',
+                ' LogMsgNo' => '',
+                ' MessageV1' => '',
+                ' MessageV2' => '',
+                ' MessageV3' => '',
+                ' MessageV4' => '',
+                ' Parameter' => '',
+                ' Row'      => '',
+                ' Field'    => '',
+                ' System'   => ''
+            );
+        }
+
+        //======================================================================
+        //==========Detail AP ==================================================
+        if ($data['Invoices']['InvoiceInfo']['AmountSummary']['BillingInvoiceCurrency'] == 'IDR') {
+            $amount_head = number_format($data['Invoices']['InvoiceInfo']['AmountSummary']['GrandInvoiceAmount'], 2, ".", "") / 100;
+        } else {
+            $amount_head = number_format($data['Invoices']['InvoiceInfo']['AmountSummary']['GrandInvoiceAmount'], 2, ".", "");
+        }
+
+        $inputHd[] = array(
+            'LgcBelnr'      => '1',
+            'LgcBuzei'      => '3',
+            'Bldat'         => nice_date($data['Invoices']['InvoiceInfo']['InvoiceDate'], 'Y-m-d'),
+            'Blart'         => $doc_type,
+            'Budat'         => nice_date($data['Invoices']['InvoiceInfo']['PostedOn'], 'Y-m-d'),
+            'Monat'         => $Period,
+            'Waers'         => $data['Invoices']['InvoiceInfo']['AmountSummary']['BillingInvoiceCurrency'],
+            'Xblnr'         => $data['Invoices']['InvoiceInfo']['InvoiceNo'],
+            'Bktxt'         => $data['Invoices']['InvoiceInfo']['JobSummary']['JobSummaryInfo']['JobNumber'],
+            'Bukrs'         => $office_code,
+            'Hkont'         => $data['Invoices']['InvoiceInfo']['Vendor']['AccountCode'],
+            'Wrbtr'         => $amount_head,
+            'Valut'         => nice_date($data['Invoices']['InvoiceInfo']['PostedOn'], 'Y-m-d'),
+            'Prctr'         => '',
+            'Kostl'         => '',
+            'Zuonr'         => $data['Invoices']['InvoiceInfo']['InvoiceNo'],
+            'Sgtxt'         => '',
+            'Shkzg'         => 'H',
+            'Lifnr'         => $data['Invoices']['InvoiceInfo']['Vendor']['Code'],
+            'Kunnr'         => '',
+            'RefLgcBelnr'   => '',
+            'FiBelnr'       => '',
+            'FiGjahr'       => '',
+            'Umskz'         => '',
+            'RefKey1'       => '31'
+        );
+
+        $inputTHd[] = array(
+            ' Type'     => '',
+            ' Id'       => '',
+            ' Number'   => '',
+            ' Message'  => '',
+            ' LogNo'    => '',
+            ' LogMsgNo' => '',
+            ' MessageV1' => '',
+            ' MessageV2' => '',
+            ' MessageV3' => '',
+            ' MessageV4' => '',
+            ' Parameter' => '',
+            ' Row'      => '',
+            ' Field'    => '',
+            ' System'   => ''
+        );
+        //======================================================================
 
         $inputdetail = array_merge($inputAP, $inputTax, $inputHd);
         $inputT = array_merge($inputTAP, $inputTTax, $inputTHd);

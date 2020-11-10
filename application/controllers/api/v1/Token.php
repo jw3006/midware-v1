@@ -33,35 +33,39 @@ class Token extends REST_Controller
                         'Response' => array(
                             'Message' => $result,
                             'RefId' => $username . $password,
-                            'Status' => 'S'
+                            'Status' => 'Success',
+                            'StatusCode' => 200
                         )
-                    ), 200);
+                    ), REST_Controller::HTTP_OK);
                 } else {
                     $this->response(array(
                         'Response' => array(
                             'Message' => 'Authorization has been denied for this request.',
                             'RefId' => $username . $password,
-                            'Status' => 'E'
+                            'Status' => 'Fail',
+                            'StatusCode' => 400
                         )
-                    ), 400);
+                    ), REST_Controller::HTTP_BAD_REQUEST);
                 }
             } else {
                 $this->response(array(
                     'Response' => array(
-                        'Message' => 'Authorization has been denied for this request.',
+                        'Message' => 'Username has been inactived for this request.',
                         'RefId' => $username . $password,
-                        'Status' => 'E'
+                        'Status' => 'Fail',
+                        'StatusCode' => 400
                     )
-                ), 400);
+                ), REST_Controller::HTTP_BAD_REQUEST);
             }
         } else {
             $this->response(array(
                 'Response' => array(
-                    'Message' => 'Authorization has been denied for this request.',
+                    'Message' => 'Username is not registered for this request.',
                     'RefId' => $username . $password,
-                    'Status' => 'E'
+                    'Status' => 'Fail',
+                    'StatusCode' => 401
                 )
-            ), 400);
+            ), REST_Controller::HTTP_UNAUTHORIZED);
         }
     }
 }

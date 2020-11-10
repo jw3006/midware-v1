@@ -45,7 +45,14 @@ class Sddocpostap extends REST_Controller
         $mode   = 'SAP_FIPOST';
         $modes  = 'SCM_FIGET';
         $data   = $this->post();
-        $params = $this->sd_postap->_array_sap($data);
+
+        $check_rows = $data['Invoices']['InvoiceInfo']['Charges']['ChargeInfo'];
+        $rows = array_count_values(array_column($check_rows, 'SeqNo'))['2'];
+        if ($rows == 1) {
+            $params = $this->sd_postap->_array_sap($data);
+        } else {
+            $params = $this->sd_postap->_array_sap1($data);
+        }
 
         $code   = $data['Invoices']['InvoiceInfo']['InvoiceNo'];
         $frontend_text  = json_encode($data, true);
