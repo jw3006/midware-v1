@@ -12,6 +12,7 @@ class Receivable extends REST_Controller
         parent::__construct();
         $this->load->library('wsdl_controller');
         $this->load->library('keys_controller');
+        $this->load->library('template/sd_postcr');
         $this->load->model('interface_model');
         $this->load->model('midware_model');
     }
@@ -61,7 +62,7 @@ class Receivable extends REST_Controller
             $code           = $data_json['code'];
             $type           = 'receivable';
             $params         = json_decode($data_json['backend_text'], true);
-            print_r($code);
+
             #Call Operation (Function). Catch and display any errors
             $wsdl = 'http://PBBs4hdap00.ic4sap.bluebirdgroup.com:8000/sap/bc/srt/wsdl/flv_10002A111AD1/bndg_url/sap/bc/srt/rfc/sap/zifi_post_fitrx_rfc_2/320/zifi_post_fitrx_rfc_2/zifi_post_fitrx_rfc_2?sap-client=320';
             $function = 'ZifiPostFitrxRfc2';
@@ -78,12 +79,14 @@ class Receivable extends REST_Controller
                 ], REST_Controller::HTTP_NOT_FOUND);
             } else {
                 $Code     = $result['message']['Belnr'];
+                $ar['kunnr']        = $params['Fitrxlgc']['item'][0]['Kunnr'];
+                $ar['account_code'] = $params['Fitrxlgc']['item'][0]['Kunnr'];
 
                 if ($Code) {
                     $Return     = $result['message']['Return']['item']['Message'];
                     $this->midware_model->insert_tb_success($code, $Return, $type);
-                    $this->db->delete('tb_interfaces', array("code" => $Code));
-                    //$this->_get_sap($ar); //method to post credit limit
+                    $this->db->delete('tb_interfaces', array('code' => $code));
+                    $this->_get_sap($ar); //method to post credit limit
                     $this->_post_db(json_decode($data_json['frontend_text'], true), $Code); // Insert to tb_invoice
                     $this->response([
                         'status' => true,
@@ -187,16 +190,9 @@ class Receivable extends REST_Controller
         $result = $this->wsdl_controller->_sap_wsdl($wsdl, $function, $username, $password, $params);
 
         if ($result['status'] == 'E') {
-            $this->response(array(
-                'Response' => array(
-                    'Message' => $result['message'],
-                    'RefId' => $code,
-                    'Status' => 'E'
-                ), 500
-            ));
         } else {
             $xml = $this->sd_postcr->_scm_xml($code, $acc_code, $result['message']['Total']);
-            print_r($xml);
+            $this->midware_model->insert_tb_success($code, $xml, 'credit limit');
         }
     }
 }

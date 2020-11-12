@@ -110,10 +110,10 @@ class Sddocpostar extends REST_Controller
                             'StatusCode' => 200
                         )
                     ), REST_Controller::HTTP_OK);
-                    //$this->_get_sap($ar); //method to post credit limit
+                    $this->_get_sap($ar); //method to post credit limit
                     $this->_post_db($data, $Code);  // save to tb_invoice
                     $this->midware_model->insert_tb_success($code, $Return, $type);
-                    $this->db->delete('tb_interfaces', array("code" => $code));
+                    $this->db->delete('tb_interfaces', array('code' => $code));
                 } else {
                     $Return     = $result['message']['Return']['item'];
 
@@ -160,7 +160,8 @@ class Sddocpostar extends REST_Controller
             ), REST_Controller::HTTP_INTERNAL_SERVER_ERROR);
         } else {
             $xml = $this->sd_postcr->_scm_xml($code, $acc_code, $result['message']['Total']);
-            print_r($xml);
+            $this->midware_model->insert_tb_success($code, $xml, 'credit limit');
+            //print_r($xml);
         }
     }
 

@@ -282,14 +282,18 @@ class Bill_receipt extends REST_Controller
             $data = $this->put();
             if ($data['type'] == 'sender') {
                 $data_put = array(
-                    'sender_name'      => $data['sender_name'],
-                    'sender_date'      => $data['sender_date'],
-                    'status'      => 'Submitted',
-                    'modified'       => date('Y-m-d H:i:s'),
-                    'modified_by'    => $data['created_by']
+                    'sender_name'   => $data['sender_name'],
+                    'sender_date'   => $data['sender_date'],
+                    'status'        => 'Submitted',
+                    'modified'      => date('Y-m-d H:i:s'),
+                    'modified_by'   => $data['created_by']
                 );
             } else {
+                $date = $data['receiver_date'];
+                date_add($date, date_interval_create_from_date_string('30 days'));
+                $due_date =  date_format($date, 'Y-m-d');
                 $data_put = array(
+                    'due_date'      => $due_date,
                     'receiver_name' => $data['receiver_name'],
                     'receiver_date' => $data['receiver_date'],
                     'status'        => 'Completed',
@@ -399,6 +403,43 @@ class Bill_receipt extends REST_Controller
                     'data' => $code
                 ], REST_Controller::HTTP_BAD_REQUEST);
             }
+        } else {
+            $this->response([
+                'status' => 'fail',
+                'message' => 'Authorization has been denied for this request.',
+                'data' => ''
+            ], REST_Controller::HTTP_BAD_REQUEST);
+        }
+    }
+
+    public function bill_report_get()
+    {
+        $auth = $this->_get_auth();
+        if ($auth == true) {
+            $dt['office_code'] = $this->get('office_code');
+            $dt['debtor'] = $this->get('debtor');
+            $dt['invoice_no'] = $this->get('invoice_no');
+            $dt['receipt_no'] = $this->get('receipt_no');
+            $dt['start_date'] = $this->get('start_date');
+            $dt['end_date'] = $this->get('end_date');
+            $dt['start_rc_date'] = $this->get('start_rc_date');
+            $dt['end_rc_date'] = $this->get('end_rc_date');
+
+            $data = $this->receipt_model->get_bill_all($dt);
+            $office_code = $this->receipt_model->get_bill_oc();
+            $debtor_code = $this->receipt_model->get_bill_debtor();
+            $receipt_code = $this->receipt_model->get_bill_rc();
+            $notif = $this->receipt_model->get_notif();
+
+            $this->response([
+                'status' => true,
+                'message' => 'The invoice receipt data has been generated.',
+                'data' => $data,
+                'notif' => $notif,
+                'oc' => $office_code,
+                'debtor' => $debtor_code,
+                'rc' => $receipt_code
+            ], REST_Controller::HTTP_OK);
         } else {
             $this->response([
                 'status' => 'fail',

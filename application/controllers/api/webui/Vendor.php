@@ -211,7 +211,7 @@ class Vendor extends REST_Controller
                     ], REST_Controller::HTTP_BAD_REQUEST);
                 } else {
                     $this->midware_model->insert_tb_success($code, $Return, $type);
-                    $this->db->delete('tb_interfaces', array("code" => $code));
+                    $this->db->delete('tb_interfaces', array('code' => $code));
                     $this->response([
                         'status' => 'success',
                         'message' => 'The vendor data has been syncronized.',

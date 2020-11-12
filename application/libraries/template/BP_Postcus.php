@@ -101,8 +101,8 @@ class BP_Postcus
             '</PartyTypes>' .
             '<Offices>' .
             '<Office>' .
-            '<Code>' . $data['OfficeCode'] . '</Code>' .
-            '<Name>' . $data['OfficeName'] . '</Name>' .
+            '<Code>CKIB</Code>' .
+            '<Name>Iron Bird Jakarta</Name>' .
             '<BillingCurrency>' . $data['BillingCurrency'] . '</BillingCurrency>' .
             '<CreditTerm>' . $data['CreditTerm'] . '</CreditTerm>' .
             '</Office>' .

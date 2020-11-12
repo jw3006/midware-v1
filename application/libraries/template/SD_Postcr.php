@@ -19,58 +19,13 @@ class SD_Postcr
         return $params;
     }
 
-    public function _array_map($scm, $sap)
-    {
-        $Header    = array(
-            'MessageType' => $scm['Header']['MessageType'],
-            'MessageVersion' => $scm['Header']['MessageVersion'],
-            'Partners' => array(
-                'PartnerInformation' => array(
-                    'PartnerIdentifier' => $scm['Header']['Partners']['PartnerInformation']['PartnerIdentifier'],
-                    'PartnerName' => $scm['Header']['Partners']['PartnerInformation']['PartnerName'],
-                    'ContactInformation' => array(
-                        'ContactName' => $scm['Header']['Partners']['PartnerInformation']['ContactInformation']['ContactName'],
-                        'ContactNumber' => $scm['Header']['Partners']['PartnerInformation']['ContactInformation']['ContactNumber'],
-                        'ContactEmail' => $scm['Header']['Partners']['PartnerInformation']['ContactInformation']['ContactEmail']
-                    )
-                )
-            )
-        );
-
-        $params = array(
-            'Header'    => $Header,
-            'Debtors' => array('DebtorCreditInfo' => $sap)
-        );
-
-        $result = $this->arrayToXml($params);
-        return $result;
-    }
-
-    public function arrayToXml($array, $rootElement = null, $xml = null)
-    {
-        $_xml = $xml;
-
-        if ($_xml === null) {
-            $_xml = new SimpleXMLElement($rootElement !== null ? $rootElement : '<DebtorOutstandingDetail/>');
-        }
-
-        foreach ($array as $k => $v) {
-            if (is_array($v)) {
-                $this->arrayToXml($v, $k, $_xml->addChild($k));
-            } else {
-                $_xml->addChild($k, $v);
-            }
-        }
-
-        return $_xml->asXML();
-    }
-
     public function _scm_xml($code, $acc_code, $data)
     {
         $xml_data = '<DebtorOutstandingDetail>' .
             '<Header>' .
-            '<MessageType>PARTY</MessageType>' .
+            '<MessageType>DEBTOROUTSTANDING</MessageType>' .
             '<MessageVersion>1</MessageVersion>' .
+            '<SentDatetime>2020-11-12</SentDatetime>' .
             '<Partners>' .
             '<PartnerInformation>' .
             '<PartnerIdentifier>SCMProFit</PartnerIdentifier>' .
@@ -96,13 +51,13 @@ class SD_Postcr
             '</Debtors>' .
             '</DebtorOutstandingDetail>';
 
-        /* $bearer_key = $this->_get_tokens();
+        $bearer_key = $this->_get_tokens();
 
         $bearer = $bearer_key;
         $curl = curl_init();
 
         curl_setopt_array($curl, array(
-            CURLOPT_URL => "http://ibluatcommonapi.scmprofit.net:80/api/v1/PartyMasterAPI/GeneratePartyMasters",
+            CURLOPT_URL => "http://ibluatcommonapi.scmprofit.net/api/v1/Outstanding/UpdateOutstandingDetails",
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_ENCODING => "",
             CURLOPT_MAXREDIRS => 10,
@@ -124,12 +79,11 @@ class SD_Postcr
             $resp_string = simplexml_load_string($response);
             $resp_json = json_encode($resp_string, true);
             $resp_data = json_decode($resp_json, true);
-            return $resp_data;
+            //return $resp_data;
+            return $resp_json;
         } else {
             return false;
-        } */
-
-        return $xml_data;
+        }
     }
 
     public function _get_tokens()
