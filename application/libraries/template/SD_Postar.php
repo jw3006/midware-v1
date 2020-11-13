@@ -7,6 +7,12 @@ class SD_Postar
     {
         $Period     = substr($data['Invoices']['InvoiceInfo']['ApprovedOn'], 4, 2);
         $items_ar = $data['Invoices']['InvoiceInfo']['Charges']['ChargeInfo'];
+        $ck_vat = count($data['Invoices']['InvoiceInfo']['AmountSummary']['TaxSummary']);
+        if (count($data['Invoices']['InvoiceInfo']['Remarks']) > 0) {
+            $remarks = $data['Invoices']['InvoiceInfo']['Remarks'];
+        } else {
+            $remarks = $data['Invoices']['InvoiceInfo']['JobSummary']['JobSummaryInfo']['JobNumber'];
+        }
 
         $office_code = $this->_office_code($data['Invoices']['InvoiceInfo']['Office']);
         if ($office_code == 'IBTO') {
@@ -38,15 +44,15 @@ class SD_Postar
             'Monat'         => $Period,
             'Waers'         => $data['Invoices']['InvoiceInfo']['AmountSummary']['BillingInvoiceCurrency'],
             'Xblnr'         => $data['Invoices']['InvoiceInfo']['InvoiceNo'],
-            'Bktxt'         => $data['Invoices']['InvoiceInfo']['JobSummary']['JobSummaryInfo']['JobNumber'],
+            'Bktxt'         => $remarks,
             'Bukrs'         => $office_code,
             'Hkont'         => $data['Invoices']['InvoiceInfo']['Debtor']['AccountCode'],
             'Wrbtr'         => $amount_head,
             'Valut'         => nice_date($data['Invoices']['InvoiceInfo']['ApprovedOn'], 'Y-m-d'),
             'Prctr'         => '',
             'Kostl'         => '',
-            'Zuonr'         => $data['Invoices']['InvoiceInfo']['InvoiceNo'],
-            'Sgtxt'         => '',
+            'Zuonr'         => $data['Invoices']['InvoiceInfo']['JobSummary']['JobSummaryInfo']['JobNumber'],
+            'Sgtxt'         => $remarks,
             'Shkzg'         => 'S',
             'Lifnr'         => '',
             'Kunnr'         => $data['Invoices']['InvoiceInfo']['Debtor']['Code'],
@@ -94,15 +100,15 @@ class SD_Postar
                 'Monat'         => $Period,
                 'Waers'         => $data['Invoices']['InvoiceInfo']['AmountSummary']['BillingInvoiceCurrency'],
                 'Xblnr'         => $data['Invoices']['InvoiceInfo']['InvoiceNo'],
-                'Bktxt'         => $data['Invoices']['InvoiceInfo']['JobSummary']['JobSummaryInfo']['JobNumber'],
+                'Bktxt'         => $remarks,
                 'Bukrs'         => $office_code,
                 'Hkont'         => $items_ar[$k]['PostingCode'],
                 'Wrbtr'         => $amount,
                 'Valut'         => nice_date($data['Invoices']['InvoiceInfo']['ApprovedOn'], 'Y-m-d'),
                 'Prctr'         => $profit_center,
                 'Kostl'         => '',
-                'Zuonr'         => $data['Invoices']['InvoiceInfo']['InvoiceNo'],
-                'Sgtxt'         => '',
+                'Zuonr'         => $data['Invoices']['InvoiceInfo']['JobSummary']['JobSummaryInfo']['JobNumber'],
+                'Sgtxt'         => substr($items_ar[$k]['ChargeDescription'], 0, 50),
                 'Shkzg'         => 'H',
                 'Lifnr'         => '',
                 'Kunnr'         => '',
@@ -151,14 +157,14 @@ class SD_Postar
                     'Monat'         => $Period,
                     'Waers'         => $data['Invoices']['InvoiceInfo']['AmountSummary']['BillingInvoiceCurrency'],
                     'Xblnr'         => $data['Invoices']['InvoiceInfo']['InvoiceNo'],
-                    'Bktxt'         => $data['Invoices']['InvoiceInfo']['JobSummary']['JobSummaryInfo']['JobNumber'],
+                    'Bktxt'         => $remarks,
                     'Bukrs'         => $office_code,
                     'Hkont'         => $items_ar[$p]['ChargeTaxes']['ChargeTaxInfo']['TaxAccountMapped'],
                     'Wrbtr'         => $amount_tax,
                     'Valut'         => nice_date($data['Invoices']['InvoiceInfo']['ApprovedOn'], 'Y-m-d'),
                     'Prctr'         => '',
                     'Kostl'         => '',
-                    'Zuonr'         => $data['Invoices']['InvoiceInfo']['InvoiceNo'],
+                    'Zuonr'         => $data['Invoices']['InvoiceInfo']['JobSummary']['JobSummaryInfo']['JobNumber'],
                     'Sgtxt'         => '',
                     'Shkzg'         => 'H',
                     'Lifnr'         => '',
@@ -189,8 +195,13 @@ class SD_Postar
             }
         }
         //======================================================================
-        $inputdetail = array_merge($inputHd, $inputAR, $inputTax);
-        $inputT = array_merge($inputTHd, $inputTAR, $inputTTax);
+        if ($ck_vat > 0) {
+            $inputdetail = array_merge($inputHd, $inputAR, $inputTax);
+            $inputT = array_merge($inputTHd, $inputTAR, $inputTTax);
+        } else {
+            $inputdetail = array_merge($inputHd, $inputAR);
+            $inputT = array_merge($inputTHd, $inputTAR);
+        }
 
         $item = array('item'  => $inputdetail);
         $itemT = array('item' => $inputT);
@@ -207,6 +218,12 @@ class SD_Postar
     {
         $Period     = substr($data['Invoices']['InvoiceInfo']['ApprovedOn'], 4, 2);
         $items_ar = $data['Invoices']['InvoiceInfo']['Charges']['ChargeInfo'];
+        $ck_vat = count($data['Invoices']['InvoiceInfo']['AmountSummary']['TaxSummary']);
+        if (count($data['Invoices']['InvoiceInfo']['Remarks']) > 0) {
+            $remarks = $data['Invoices']['InvoiceInfo']['Remarks'];
+        } else {
+            $remarks = $data['Invoices']['InvoiceInfo']['JobSummary']['JobSummaryInfo']['JobNumber'];
+        }
 
         $office_code = $this->_office_code($data['Invoices']['InvoiceInfo']['Office']);
         if ($office_code == 'IBTO') {
@@ -218,7 +235,7 @@ class SD_Postar
         $cc['CompanyCode'] = $office_code; //sample
         $cc['OfficeCode']  = $data['Invoices']['InvoiceInfo']['Office']; //sample
         $cc['ServiceCode'] = $data['Invoices']['InvoiceInfo']['JobSummary']['JobSummaryInfo']['JobType']; //sample
-        $cc['VehicleCode'] = 'BOX'; //sample
+        $cc['VehicleCode'] = ''; //sample
         $profit_center = $this->_profit_center($cc);
 
         if ($data['Invoices']['InvoiceInfo']['AmountSummary']['BillingInvoiceCurrency'] == 'IDR') {
@@ -237,15 +254,15 @@ class SD_Postar
             'Monat'         => $Period,
             'Waers'         => $data['Invoices']['InvoiceInfo']['AmountSummary']['BillingInvoiceCurrency'],
             'Xblnr'         => $data['Invoices']['InvoiceInfo']['InvoiceNo'],
-            'Bktxt'         => $data['Invoices']['InvoiceInfo']['JobSummary']['JobSummaryInfo']['JobNumber'],
+            'Bktxt'         => $remarks,
             'Bukrs'         => $office_code,
             'Hkont'         => $data['Invoices']['InvoiceInfo']['Debtor']['AccountCode'],
             'Wrbtr'         => $amount_head,
             'Valut'         => nice_date($data['Invoices']['InvoiceInfo']['ApprovedOn'], 'Y-m-d'),
-            'Prctr'         => '',
+            'Prctr'         => $profit_center,
             'Kostl'         => '',
-            'Zuonr'         => $data['Invoices']['InvoiceInfo']['InvoiceNo'],
-            'Sgtxt'         => '',
+            'Zuonr'         => $data['Invoices']['InvoiceInfo']['JobSummary']['JobSummaryInfo']['JobNumber'],
+            'Sgtxt'         => $remarks,
             'Shkzg'         => 'S',
             'Lifnr'         => '',
             'Kunnr'         => $data['Invoices']['InvoiceInfo']['Debtor']['Code'],
@@ -289,15 +306,15 @@ class SD_Postar
             'Monat'         => $Period,
             'Waers'         => $data['Invoices']['InvoiceInfo']['AmountSummary']['BillingInvoiceCurrency'],
             'Xblnr'         => $data['Invoices']['InvoiceInfo']['InvoiceNo'],
-            'Bktxt'         => $data['Invoices']['InvoiceInfo']['JobSummary']['JobSummaryInfo']['JobNumber'],
+            'Bktxt'         => $remarks,
             'Bukrs'         => $office_code,
             'Hkont'         => $items_ar['PostingCode'],
             'Wrbtr'         => $amount,
             'Valut'         => nice_date($data['Invoices']['InvoiceInfo']['ApprovedOn'], 'Y-m-d'),
             'Prctr'         => $profit_center,
             'Kostl'         => '',
-            'Zuonr'         => $data['Invoices']['InvoiceInfo']['InvoiceNo'],
-            'Sgtxt'         => '',
+            'Zuonr'         => $data['Invoices']['InvoiceInfo']['JobSummary']['JobSummaryInfo']['JobNumber'],
+            'Sgtxt'         => substr($items_ar['ChargeDescription'], 0, 50),
             'Shkzg'         => 'H',
             'Lifnr'         => '',
             'Kunnr'         => '',
@@ -345,14 +362,14 @@ class SD_Postar
                 'Monat'         => $Period,
                 'Waers'         => $data['Invoices']['InvoiceInfo']['AmountSummary']['BillingInvoiceCurrency'],
                 'Xblnr'         => $data['Invoices']['InvoiceInfo']['InvoiceNo'],
-                'Bktxt'         => $data['Invoices']['InvoiceInfo']['JobSummary']['JobSummaryInfo']['JobNumber'],
+                'Bktxt'         => $remarks,
                 'Bukrs'         => $office_code,
                 'Hkont'         => $items_ar['ChargeTaxes']['ChargeTaxInfo']['TaxAccountMapped'],
                 'Wrbtr'         => $amount_tax,
                 'Valut'         => nice_date($data['Invoices']['InvoiceInfo']['ApprovedOn'], 'Y-m-d'),
                 'Prctr'         => '',
                 'Kostl'         => '',
-                'Zuonr'         => $data['Invoices']['InvoiceInfo']['InvoiceNo'],
+                'Zuonr'         => $data['Invoices']['InvoiceInfo']['JobSummary']['JobSummaryInfo']['JobNumber'],
                 'Sgtxt'         => '',
                 'Shkzg'         => 'H',
                 'Lifnr'         => '',
@@ -384,8 +401,13 @@ class SD_Postar
 
         //======================================================================
 
-        $inputdetail = array_merge($inputHd, $inputAR, $inputTax);
-        $inputT = array_merge($inputTHd, $inputTAR, $inputTTax);
+        if ($ck_vat > 0) {
+            $inputdetail = array_merge($inputHd, $inputAR, $inputTax);
+            $inputT = array_merge($inputTHd, $inputTAR, $inputTTax);
+        } else {
+            $inputdetail = array_merge($inputHd, $inputAR);
+            $inputT = array_merge($inputTHd, $inputTAR);
+        }
 
         $item = array('item'  => $inputdetail);
         $itemT = array('item' => $inputT);
@@ -411,13 +433,8 @@ class SD_Postar
     {
         $CI = &get_instance();
         $CI->db->select('profit_cost');
-
-        if ($cc['CompanyCode'] == 'IBTO') {
-            $rc = $CI->db->get_where('tb_map_pc', ['office_code' => $cc['OfficeCode'], 'service_code' => $cc['ServiceCode'], 'type' => 'PC'])->row_array();
-            return $rc['profit_cost'];
-        } else {
-            $rc = $CI->db->get_where('tb_map_pc', ['office_code' => $cc['OfficeCode'], 'material_code' => $cc['VehicleCode'], 'type' => 'PC'])->row_array();
-            return $rc['profit_cost'];
-        }
+        $rc = $CI->db->get_where('tb_map_pc', ['office_code' => $cc['OfficeCode'], 'service_code' => $cc['ServiceCode'], 'material_code' => $cc['VehicleCode'], 'type' => 'PC'])->row_array();
+        //return $rc['profit_cost'];
+        return "PSHIT00F"; //for dummy
     }
 }

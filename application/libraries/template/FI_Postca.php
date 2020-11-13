@@ -7,7 +7,11 @@ class FI_Postca
     {
         $Period     = substr($data['AdvanceRequest']['AdvanceRequestDetails']['BasicDetails']['FinalizationDate'], 4, 2);
         $items = $data['AdvanceRequest']['AdvanceRequestDetails']['AdvancePostingDetails']['AdvancePosting'];
-
+        if ($data['AdvanceRequest']['AdvanceRequestDetails']['ChargeDetails']['ChargeDetail'][0]) {
+            $Zuonr = $data['AdvanceRequest']['AdvanceRequestDetails']['ChargeDetails']['ChargeDetail'][0]['JobNo'];
+        } else {
+            $Zuonr = $data['AdvanceRequest']['AdvanceRequestDetails']['ChargeDetails']['ChargeDetail']['JobNo'];
+        }
         $no_acc = 0;
         foreach ($items as $k => $v) {
             $no_acc++;
@@ -49,7 +53,7 @@ class FI_Postca
                 'Valut'         => nice_date($data['AdvanceRequest']['AdvanceRequestDetails']['BasicDetails']['FinalizationDate'], 'Y-m-d'),
                 'Prctr'         => '',
                 'Kostl'         => '',
-                'Zuonr'         => $data['AdvanceRequest']['AdvanceRequestDetails']['BasicDetails']['AdvanceNo'],
+                'Zuonr'         => $Zuonr,
                 'Sgtxt'         => $data['AdvanceRequest']['AdvanceRequestDetails']['BasicDetails']['AdvanceNo'],
                 'Shkzg'         => $Shkzg,
                 'Lifnr'         => '',

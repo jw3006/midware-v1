@@ -7,6 +7,16 @@ class SD_Postap
     {
         $Period     = substr($data['Invoices']['InvoiceInfo']['PostedOn'], 4, 2);
         $items_ap = $data['Invoices']['InvoiceInfo']['Charges']['ChargeInfo'];
+        $ck_vat = count($data['Invoices']['InvoiceInfo']['AmountSummary']['TaxSummary']);
+
+        $inv_type = $data['Invoices']['InvoiceInfo']['InvoiceType'];
+        if ($inv_type !== 'CashExpense') {
+            $Lifnr = $data['Invoices']['InvoiceInfo']['Vendor']['Code'];
+            $RefKey1 = '31';
+        } else {
+            $Lifnr = '';
+            $RefKey1 = '50';
+        }
 
         //==========Detail Cost AP ==================================================
         $no_acc = 0;
@@ -23,7 +33,7 @@ class SD_Postap
             $cc['CompanyCode'] = $office_code; //sample
             $cc['OfficeCode'] = $data['Invoices']['InvoiceInfo']['Office']; //sample
             $cc['ServiceCode'] = $data['Invoices']['InvoiceInfo']['JobSummary']['JobSummaryInfo']['JobType']; //sample
-            $cc['VehicleCode'] = 'BOX'; //sample
+            $cc['VehicleCode'] = ''; //sample
             $cost_center = $this->_cost_center($cc);
 
             if ($data['Invoices']['InvoiceInfo']['AmountSummary']['BillingInvoiceCurrency'] == 'IDR') {
@@ -48,8 +58,8 @@ class SD_Postap
                 'Valut'         => nice_date($data['Invoices']['InvoiceInfo']['PostedOn'], 'Y-m-d'),
                 'Prctr'         => '',
                 'Kostl'         => $cost_center,
-                'Zuonr'         => $data['Invoices']['InvoiceInfo']['InvoiceNo'],
-                'Sgtxt'         => '',
+                'Zuonr'         => $data['Invoices']['InvoiceInfo']['JobSummary']['JobSummaryInfo']['JobNumber'],
+                'Sgtxt'         => substr($items_ap[$k]['ChargeDescription'], 0, 50),
                 'Shkzg'         => 'S',
                 'Lifnr'         => '',
                 'Kunnr'         => '',
@@ -61,20 +71,20 @@ class SD_Postap
             );
 
             $inputTAP[] = array(
-                ' Type'     => '',
-                ' Id'       => '',
-                ' Number'   => '',
-                ' Message'  => '',
-                ' LogNo'    => '',
-                ' LogMsgNo' => '',
-                ' MessageV1' => '',
-                ' MessageV2' => '',
-                ' MessageV3' => '',
-                ' MessageV4' => '',
-                ' Parameter' => '',
-                ' Row'      => '',
-                ' Field'    => '',
-                ' System'   => ''
+                'Type'     => '',
+                'Id'       => '',
+                'Number'   => '',
+                'Message'  => '',
+                'LogNo'    => '',
+                'LogMsgNo' => '',
+                'MessageV1' => '',
+                'MessageV2' => '',
+                'MessageV3' => '',
+                'MessageV4' => '',
+                'Parameter' => '',
+                'Row'      => '',
+                'Field'    => '',
+                'System'   => ''
             );
         }
 
@@ -106,7 +116,7 @@ class SD_Postap
                     'Valut'         => nice_date($data['Invoices']['InvoiceInfo']['PostedOn'], 'Y-m-d'),
                     'Prctr'         => '',
                     'Kostl'         => '',
-                    'Zuonr'         => $data['Invoices']['InvoiceInfo']['InvoiceNo'],
+                    'Zuonr'         => $data['Invoices']['InvoiceInfo']['JobSummary']['JobSummaryInfo']['JobNumber'],
                     'Sgtxt'         => '',
                     'Shkzg'         => 'S',
                     'Lifnr'         => '',
@@ -119,20 +129,20 @@ class SD_Postap
                 );
 
                 $inputTTax[] = array(
-                    ' Type'     => '',
-                    ' Id'       => '',
-                    ' Number'   => '',
-                    ' Message'  => '',
-                    ' LogNo'    => '',
-                    ' LogMsgNo' => '',
-                    ' MessageV1' => '',
-                    ' MessageV2' => '',
-                    ' MessageV3' => '',
-                    ' MessageV4' => '',
-                    ' Parameter' => '',
-                    ' Row'      => '',
-                    ' Field'    => '',
-                    ' System'   => ''
+                    'Type'     => '',
+                    'Id'       => '',
+                    'Number'   => '',
+                    'Message'  => '',
+                    'LogNo'    => '',
+                    'LogMsgNo' => '',
+                    'MessageV1' => '',
+                    'MessageV2' => '',
+                    'MessageV3' => '',
+                    'MessageV4' => '',
+                    'Parameter' => '',
+                    'Row'      => '',
+                    'Field'    => '',
+                    'System'   => ''
                 );
             }
         }
@@ -160,39 +170,43 @@ class SD_Postap
             'Wrbtr'         => $amount_head,
             'Valut'         => nice_date($data['Invoices']['InvoiceInfo']['PostedOn'], 'Y-m-d'),
             'Prctr'         => '',
-            'Kostl'         => $cost_center,
-            'Zuonr'         => $data['Invoices']['InvoiceInfo']['InvoiceNo'],
+            'Kostl'         => '',
+            'Zuonr'         => $data['Invoices']['InvoiceInfo']['JobSummary']['JobSummaryInfo']['JobNumber'],
             'Sgtxt'         => '',
             'Shkzg'         => 'H',
-            'Lifnr'         => $data['Invoices']['InvoiceInfo']['Vendor']['Code'],
+            'Lifnr'         => $Lifnr,
             'Kunnr'         => '',
             'RefLgcBelnr'   => '',
             'FiBelnr'       => '',
             'FiGjahr'       => '',
             'Umskz'         => '',
-            'RefKey1'       => '31'
+            'RefKey1'       => $RefKey1
         );
 
         $inputTHd[] = array(
-            ' Type'     => '',
-            ' Id'       => '',
-            ' Number'   => '',
-            ' Message'  => '',
-            ' LogNo'    => '',
-            ' LogMsgNo' => '',
-            ' MessageV1' => '',
-            ' MessageV2' => '',
-            ' MessageV3' => '',
-            ' MessageV4' => '',
-            ' Parameter' => '',
-            ' Row'      => '',
-            ' Field'    => '',
-            ' System'   => ''
+            'Type'     => '',
+            'Id'       => '',
+            'Number'   => '',
+            'Message'  => '',
+            'LogNo'    => '',
+            'LogMsgNo' => '',
+            'MessageV1' => '',
+            'MessageV2' => '',
+            'MessageV3' => '',
+            'MessageV4' => '',
+            'Parameter' => '',
+            'Row'      => '',
+            'Field'    => '',
+            'System'   => ''
         );
         //======================================================================
-
-        $inputdetail = array_merge($inputAP, $inputTax, $inputHd);
-        $inputT = array_merge($inputTAP, $inputTTax, $inputTHd);
+        if ($ck_vat > 0) {
+            $inputdetail = array_merge($inputAP, $inputTax, $inputHd);
+            $inputT = array_merge($inputTAP, $inputTTax, $inputTHd);
+        } else {
+            $inputdetail = array_merge($inputAP, $inputHd);
+            $inputT = array_merge($inputTAP, $inputTHd);
+        }
 
         $item = array('item'  => $inputdetail);
         $itemT = array('item' => $inputT);
@@ -209,7 +223,16 @@ class SD_Postap
     {
         $Period     = substr($data['Invoices']['InvoiceInfo']['PostedOn'], 4, 2);
         $items_ap = $data['Invoices']['InvoiceInfo']['Charges']['ChargeInfo'];
+        $ck_vat = count($data['Invoices']['InvoiceInfo']['AmountSummary']['TaxSummary']);
 
+        $inv_type = $data['Invoices']['InvoiceInfo']['InvoiceType'];
+        if ($inv_type !== 'CashExpense') {
+            $Lifnr = $data['Invoices']['InvoiceInfo']['Vendor']['Code'];
+            $RefKey1 = '31';
+        } else {
+            $Lifnr = '';
+            $RefKey1 = '50';
+        }
 
         $office_code = $this->_office_code($data['Invoices']['InvoiceInfo']['Office']);
         if ($office_code == 'IBTO') {
@@ -247,8 +270,8 @@ class SD_Postap
             'Valut'         => nice_date($data['Invoices']['InvoiceInfo']['PostedOn'], 'Y-m-d'),
             'Prctr'         => '',
             'Kostl'         => $cost_center,
-            'Zuonr'         => $data['Invoices']['InvoiceInfo']['InvoiceNo'],
-            'Sgtxt'         => '',
+            'Zuonr'         => $data['Invoices']['InvoiceInfo']['JobSummary']['JobSummaryInfo']['JobNumber'],
+            'Sgtxt'         => substr($items_ap['ChargeDescription'], 0, 50),
             'Shkzg'         => 'S',
             'Lifnr'         => '',
             'Kunnr'         => '',
@@ -260,20 +283,20 @@ class SD_Postap
         );
 
         $inputTAP[] = array(
-            ' Type'     => '',
-            ' Id'       => '',
-            ' Number'   => '',
-            ' Message'  => '',
-            ' LogNo'    => '',
-            ' LogMsgNo' => '',
-            ' MessageV1' => '',
-            ' MessageV2' => '',
-            ' MessageV3' => '',
-            ' MessageV4' => '',
-            ' Parameter' => '',
-            ' Row'      => '',
-            ' Field'    => '',
-            ' System'   => ''
+            'Type'     => '',
+            'Id'       => '',
+            'Number'   => '',
+            'Message'  => '',
+            'LogNo'    => '',
+            'LogMsgNo' => '',
+            'MessageV1' => '',
+            'MessageV2' => '',
+            'MessageV3' => '',
+            'MessageV4' => '',
+            'Parameter' => '',
+            'Row'      => '',
+            'Field'    => '',
+            'System'   => ''
         );
 
         //======================================================================
@@ -302,7 +325,7 @@ class SD_Postap
                 'Valut'         => nice_date($data['Invoices']['InvoiceInfo']['PostedOn'], 'Y-m-d'),
                 'Prctr'         => '',
                 'Kostl'         => '',
-                'Zuonr'         => $data['Invoices']['InvoiceInfo']['InvoiceNo'],
+                'Zuonr'         => $data['Invoices']['InvoiceInfo']['JobSummary']['JobSummaryInfo']['JobNumber'],
                 'Sgtxt'         => '',
                 'Shkzg'         => 'S',
                 'Lifnr'         => '',
@@ -315,20 +338,20 @@ class SD_Postap
             );
 
             $inputTTax[] = array(
-                ' Type'     => '',
-                ' Id'       => '',
-                ' Number'   => '',
-                ' Message'  => '',
-                ' LogNo'    => '',
-                ' LogMsgNo' => '',
-                ' MessageV1' => '',
-                ' MessageV2' => '',
-                ' MessageV3' => '',
-                ' MessageV4' => '',
-                ' Parameter' => '',
-                ' Row'      => '',
-                ' Field'    => '',
-                ' System'   => ''
+                'Type'     => '',
+                'Id'       => '',
+                'Number'   => '',
+                'Message'  => '',
+                'LogNo'    => '',
+                'LogMsgNo' => '',
+                'MessageV1' => '',
+                'MessageV2' => '',
+                'MessageV3' => '',
+                'MessageV4' => '',
+                'Parameter' => '',
+                'Row'      => '',
+                'Field'    => '',
+                'System'   => ''
             );
         }
 
@@ -356,38 +379,42 @@ class SD_Postap
             'Valut'         => nice_date($data['Invoices']['InvoiceInfo']['PostedOn'], 'Y-m-d'),
             'Prctr'         => '',
             'Kostl'         => $cost_center,
-            'Zuonr'         => $data['Invoices']['InvoiceInfo']['InvoiceNo'],
+            'Zuonr'         => $data['Invoices']['InvoiceInfo']['JobSummary']['JobSummaryInfo']['JobNumber'],
             'Sgtxt'         => '',
             'Shkzg'         => 'H',
-            'Lifnr'         => $data['Invoices']['InvoiceInfo']['Vendor']['Code'],
+            'Lifnr'         => $Lifnr,
             'Kunnr'         => '',
             'RefLgcBelnr'   => '',
             'FiBelnr'       => '',
             'FiGjahr'       => '',
             'Umskz'         => '',
-            'RefKey1'       => '31'
+            'RefKey1'       => $RefKey1
         );
 
         $inputTHd[] = array(
-            ' Type'     => '',
-            ' Id'       => '',
-            ' Number'   => '',
-            ' Message'  => '',
-            ' LogNo'    => '',
-            ' LogMsgNo' => '',
-            ' MessageV1' => '',
-            ' MessageV2' => '',
-            ' MessageV3' => '',
-            ' MessageV4' => '',
-            ' Parameter' => '',
-            ' Row'      => '',
-            ' Field'    => '',
-            ' System'   => ''
+            'Type'     => '',
+            'Id'       => '',
+            'Number'   => '',
+            'Message'  => '',
+            'LogNo'    => '',
+            'LogMsgNo' => '',
+            'MessageV1' => '',
+            'MessageV2' => '',
+            'MessageV3' => '',
+            'MessageV4' => '',
+            'Parameter' => '',
+            'Row'      => '',
+            'Field'    => '',
+            'System'   => ''
         );
         //======================================================================
-
-        $inputdetail = array_merge($inputAP, $inputTax, $inputHd);
-        $inputT = array_merge($inputTAP, $inputTTax, $inputTHd);
+        if ($ck_vat > 0) {
+            $inputdetail = array_merge($inputAP, $inputTax, $inputHd);
+            $inputT = array_merge($inputTAP, $inputTTax, $inputTHd);
+        } else {
+            $inputdetail = array_merge($inputAP, $inputHd);
+            $inputT = array_merge($inputTAP, $inputTHd);
+        }
 
         $item = array('item'  => $inputdetail);
         $itemT = array('item' => $inputT);
@@ -413,13 +440,8 @@ class SD_Postap
     {
         $CI = &get_instance();
         $CI->db->select('profit_cost');
-
-        if ($cc['CompanyCode'] == 'IBTO') {
-            $rc = $CI->db->get_where('tb_map_pc', ['office_code' => $cc['OfficeCode'], 'service_code' => $cc['ServiceCode'], 'type' => 'CC'])->row_array();
-            return $rc['profit_cost'];
-        } else {
-            $rc = $CI->db->get_where('tb_map_pc', ['office_code' => $cc['OfficeCode'], 'material_code' => $cc['VehicleCode'], 'type' => 'CC'])->row_array();
-            return $rc['profit_cost'];
-        }
+        $rc = $CI->db->get_where('tb_map_pc', ['office_code' => $cc['OfficeCode'], 'service_code' => $cc['ServiceCode'], 'material_code' => $cc['VehicleCode'], 'type' => 'CC'])->row_array();
+        //return $rc['profit_cost'];
+        return "PSHIT00F05"; //for dummy
     }
 }
