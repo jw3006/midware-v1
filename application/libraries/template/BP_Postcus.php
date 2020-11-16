@@ -65,7 +65,7 @@ class BP_Postcus
             '<Code>' . $data['Code'] . '</Code>' .
             '<Name>' . $data['Name'] . '</Name>' .
             '</PartyName>' .
-            '<SpecialInstructions>No</SpecialInstructions>' .
+            '<SpecialInstructions></SpecialInstructions>' .
             '<Addresses>' .
             '<Address>' .
             '<AddressType>HO</AddressType>' .
@@ -111,6 +111,7 @@ class BP_Postcus
             '</Party>' .
             '</Parties>' .
             '</Message>';
+
 
         $bearer_key = $this->_get_tokens();
         $bearer = "Authorization: bearer " . $bearer_key;
