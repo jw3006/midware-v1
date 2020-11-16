@@ -9,6 +9,8 @@ class BP_Postven
         //print_r($items);
         if ($code == '') {
             foreach ($items as $k => $v) {
+                $office = $this->get_office_code($items[$k]['Ekorg'], $items[$k]['Bukrs']);
+
                 $cust['Code'] = $items[$k]['Lifnr'];
                 $cust['Name'] = $items[$k]['NameOrg1'] . ' ' . $items[$k]['NameOrg2'];
                 $cust['AddressLine'] = $items[$k]['Stras'] ? $items[$k]['Stras'] : '-';
@@ -16,10 +18,10 @@ class BP_Postven
                 $cust['ZipCode'] = $items[$k]['Pstlz'] ? $items[$k]['Pstlz'] : '-';
                 $cust['CountryCode'] = $items[$k]['Land1'] ? $items[$k]['Land1'] : 'ID';
                 $cust['FirstName'] = $items[$k]['NameFirst'] ? $items[$k]['NameFirst'] : '-';
-                $cust['Number'] = $items[$k]['Telfx'] ? $items[$k]['Telfx'] : '-';
+                $cust['Number'] = $items[$k]['Telf1'] ? $items[$k]['Telf1'] : '-';
                 $cust['Email'] = $items[$k]['SmtpAddr'] ? $items[$k]['SmtpAddr'] : '-';
-                $cust['OfficeCode'] = $items[$k]['Ekorg'] ? $items[$k]['Ekorg'] : 'CKIB';  //CKIB is default for testing
-                $cust['OfficeName'] = $items[$k]['EkorgName1'] ? $items[$k]['EkorgName1'] : 'Iron Bird Jakarta'; //Iron Bird Jakarta is default for testing
+                $cust['OfficeCode'] = $office['code'] ? $office['code'] : 'SYIT';
+                $cust['OfficeName'] = $office['name'] ? $office['name'] : 'IRON BIRD TRANSPORT JAKARTA';
                 $cust['CreditTerm'] = $items[$k]['Zterm'] ? $items[$k]['Zterm'] : '0';
                 $cust['BillingCurrency'] = $items[$k]['Waers'] ? $items[$k]['Waers'] : 'IDR';
                 $cust['FirstName'] = $items[$k]['CpNameFirst'] ? $items[$k]['CpNameFirst'] : '-';
@@ -28,6 +30,8 @@ class BP_Postven
             }
         } else {
             foreach ($items as $k => $v) {
+                $office = $this->get_office_code($items[$k]['Ekorg'], $items[$k]['Bukrs']);
+
                 if ($items[$k]['Lifnr'] == $code) {
                     $cust['Code'] = $items[$k]['Lifnr'];
                     $cust['Name'] = $items[$k]['NameOrg1'] . ' ' . $items[$k]['NameOrg2'];
@@ -36,10 +40,10 @@ class BP_Postven
                     $cust['ZipCode'] = $items[$k]['Pstlz'] ? $items[$k]['Pstlz'] : '-';
                     $cust['CountryCode'] = $items[$k]['Land1'] ? $items[$k]['Land1'] : 'ID';
                     $cust['FirstName'] = $items[$k]['NameFirst'] ? $items[$k]['NameFirst'] : '-';
-                    $cust['Number'] = $items[$k]['Telfx'] ? $items[$k]['Telfx'] : '-';
+                    $cust['Number'] = $items[$k]['Telf1'] ? $items[$k]['Telf1'] : '-';
                     $cust['Email'] = $items[$k]['SmtpAddr'] ? $items[$k]['SmtpAddr'] : '-';
-                    $cust['OfficeCode'] = $items[$k]['Ekorg'] ? $items[$k]['Ekorg'] : 'CKIB';  //CKIB is default for testing
-                    $cust['OfficeName'] = $items[$k]['EkorgName'] ? $items[$k]['EkorgName'] : 'Iron Bird Jakarta'; //Iron Bird Jakarta is default for testing
+                    $cust['OfficeCode'] = $office['code'] ? $office['code'] : 'SYIT';
+                    $cust['OfficeName'] = $office['name'] ? $office['name'] : 'IRON BIRD TRANSPORT JAKARTA';
                     $cust['CreditTerm'] = $items[$k]['Zterm'] ? $items[$k]['Zterm'] : '0';
                     $cust['BillingCurrency'] = $items[$k]['Waers'] ? $items[$k]['Waers'] : 'IDR';
                     $cust['FirstName'] = $items[$k]['CpNameFirst'] ? $items[$k]['CpNameFirst'] : '-';
@@ -53,12 +57,13 @@ class BP_Postven
 
     public function _scm_xml($data)
     {
+        $MessageDateTime = date('YmdHis');
         $xml_data = '<Message>' .
             '<Header>' .
             '<MessageType>PARTY</MessageType>' .
             '<MessageVersion>1</MessageVersion>' .
             '<MessageIdentifier>4230f614-63f8-4e9b-9a25-a7939ae4fdf4</MessageIdentifier>' .
-            '<MessageDateTime>20200317080025</MessageDateTime>' .
+            '<MessageDateTime>' . $MessageDateTime . '</MessageDateTime>' .
             '</Header>' .
             '<Parties>' .
             '<Party>' .
@@ -67,7 +72,7 @@ class BP_Postven
             '<Code>' . $data['Code'] . '</Code>' .
             '<Name>' . $data['Name'] . '</Name>' .
             '</PartyName>' .
-            '<SpecialInstructions>No</SpecialInstructions>' .
+            '<SpecialInstructions></SpecialInstructions>' .
             '<Addresses>' .
             '<Address>' .
             '<AddressType>HO</AddressType>' .
@@ -103,8 +108,8 @@ class BP_Postven
             '</PartyTypes>' .
             '<Offices>' .
             '<Office>' .
-            '<Code>CKIB</Code>' .
-            '<Name>Iron Bird Jakarta</Name>' .
+            '<Code>' . $data['OfficeCode'] . '</Code>' .
+            '<Name>' . $data['OfficeName'] . '</Name>' .
             '<BillingCurrency>' . $data['BillingCurrency'] . '</BillingCurrency>' .
             '<CreditTerm>' . $data['CreditTerm'] . '</CreditTerm>' .
             '</Office>' .
@@ -151,58 +156,18 @@ class BP_Postven
         }
     }
 
-    public function _get_array($data, $code = '')
-    {
-        $items = $data['message']['YfiCustomer']['item'];
-        if ($code == '') {
-            foreach ($items as $k => $v) {
-                $cust['code'] = $items[$k]['Kunnr'];
-                $cust['name'] = $items[$k]['NameOrg1'] . ' ' . $items[$k]['NameOrg2'];
-                $cust['address'] = $items[$k]['Stras'] ? $items[$k]['Stras'] : '-';
-                $cust['city'] = $items[$k]['Ort01'] ? $items[$k]['Ort01'] : 'Jakarta';
-                $cust['zip_code'] = $items[$k]['Pstlz'] ? $items[$k]['Pstlz'] : '-';
-                $cust['country_code'] = $items[$k]['Land1'] ? $items[$k]['Land1'] : 'ID';
-                $cust['phone'] = $items[$k]['Telfx'] ? $items[$k]['Telfx'] : '-';
-                $cust['email'] = $items[$k]['SmtpAddr'] ? $items[$k]['SmtpAddr'] : '-';
-                $cust['npwp'] = $items[$k]['Stcd1'] ? $items[$k]['Stcd1'] : '-';
-                $cust['office_code'] = $items[$k]['Vkbur'] ? $items[$k]['Vkbur'] : 'CKIB';  //CKIB is default for testing
-                $cust['credit_term'] = $items[$k]['Zterm'] ? $items[$k]['Zterm'] : '0';
-                $cust['currency'] = $items[$k]['Waers'] ? $items[$k]['Waers'] : 'IDR';
-                $cust['contact_person'] = $items[$k]['CpNameFirst'] ? $items[$k]['CpNameFirst'] . ' ' . $items[$k]['CpNameLast'] : '-';
-                $cust['created'] = date('Y-m-d H:i:s');
-                $cust['created_by'] = 'bp_postcus';
-                $cust_array = $cust;
-            }
-        } else {
-            foreach ($items as $k => $v) {
-                if ($items[$k]['Kunnr'] == $code) {
-                    $cust['code'] = $items[$k]['Kunnr'];
-                    $cust['name'] = $items[$k]['NameOrg1'] . ' ' . $items[$k]['NameOrg2'];
-                    $cust['address'] = $items[$k]['Stras'] ? $items[$k]['Stras'] : '-';
-                    $cust['city'] = $items[$k]['Ort01'] ? $items[$k]['Ort01'] : 'Jakarta';
-                    $cust['zip_code'] = $items[$k]['Pstlz'] ? $items[$k]['Pstlz'] : '-';
-                    $cust['country_code'] = $items[$k]['Land1'] ? $items[$k]['Land1'] : 'ID';
-                    $cust['phone'] = $items[$k]['Telfx'] ? $items[$k]['Telfx'] : '-';
-                    $cust['email'] = $items[$k]['SmtpAddr'] ? $items[$k]['SmtpAddr'] : '-';
-                    $cust['npwp'] = $items[$k]['Stcd1'] ? $items[$k]['Stcd1'] : '-';
-                    $cust['office_code'] = $items[$k]['Vkbur'] ? $items[$k]['Vkbur'] : 'CKIB';  //CKIB is default for testing
-                    $cust['credit_term'] = $items[$k]['Zterm'] ? $items[$k]['Zterm'] : '0';
-                    $cust['currency'] = $items[$k]['Waers'] ? $items[$k]['Waers'] : 'IDR';
-                    $cust['contact_person'] = $items[$k]['CpNameFirst'] ? $items[$k]['CpNameFirst'] . ' ' . $items[$k]['CpNameLast'] : '-';
-                    $cust['created'] = date('Y-m-d H:i:s');
-                    $cust['created_by'] = 'bp_postcus';
-                    $cust_array = $cust;
-                }
-            }
-        }
-        return $cust_array;
-    }
-
     public function _get_tokens()
     {
         $CI = &get_instance();
         $CI->db->select('access_token');
         $rc = $CI->db->get_where('tb_token')->row_array();
         return $rc['access_token'];
+    }
+
+    public function get_office_code($sap, $entity)
+    {
+        $CI = &get_instance();
+        $CI->db->select('code, name');
+        return $CI->db->get_where('tb_map_office', ['sap_code' => $sap, 'entity' => $entity])->row_array();
     }
 }

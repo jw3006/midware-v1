@@ -190,10 +190,8 @@ class Vendor extends REST_Controller
         } else {
             if ($etype == 'repost') {
                 $data_sap = $this->bp_postven->_get_result($result, $code_sap);
-                $array_cus = $this->bp_postven->_get_array($result, $code_sap);
             } else {
                 $data_sap = $this->bp_postven->_get_result($result, $code_sap);
-                $array_cus = $this->bp_postven->_get_array($result, $code_sap);
             }
             $Return = json_encode($data_sap, true);
             if ($data_sap !== false) {
@@ -217,7 +215,6 @@ class Vendor extends REST_Controller
                         'message' => 'The vendor data has been syncronized.',
                         'data' => $code
                     ], REST_Controller::HTTP_OK);
-                    $this->midware_model->insert_tb_debtor($code, $array_cus);
                 }
             } else {
                 if ($etype == 'repost') {

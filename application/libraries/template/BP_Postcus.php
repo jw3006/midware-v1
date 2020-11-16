@@ -8,6 +8,8 @@ class BP_Postcus
         $items = $data['message']['YfiCustomer']['item'];
         if ($code == '') {
             foreach ($items as $k => $v) {
+                $office = $this->get_office_code($items[$k]['Vkbur'], $items[$k]['Vkorg']);
+
                 $cust['Code'] = $items[$k]['Kunnr'];
                 $cust['Name'] = $items[$k]['NameOrg1'] . ' ' . $items[$k]['NameOrg2'];
                 $cust['AddressLine'] = $items[$k]['Stras'] ? $items[$k]['Stras'] : '-';
@@ -16,8 +18,8 @@ class BP_Postcus
                 $cust['CountryCode'] = $items[$k]['Land1'] ? $items[$k]['Land1'] : 'ID';
                 $cust['Number'] = $items[$k]['Telfx'] ? $items[$k]['Telfx'] : '-';
                 $cust['Email'] = $items[$k]['SmtpAddr'] ? $items[$k]['SmtpAddr'] : '-';
-                $cust['OfficeCode'] = $items[$k]['Vkbur'] ? $items[$k]['Vkbur'] : 'CKIB';  //CKIB is default for testing
-                $cust['OfficeName'] = $items[$k]['VkburName'] ? $items[$k]['VkburName'] : 'Iron Bird Jakarta'; //Iron Bird Jakarta is default for testing
+                $cust['OfficeCode'] = $office['code'] ? $office['code'] : 'SYIT';
+                $cust['OfficeName'] = $office['name'] ? $office['name'] : 'IRON BIRD TRANSPORT JAKARTA';
                 $cust['CreditTerm'] = $items[$k]['Zterm'] ? $items[$k]['Zterm'] : '0';
                 $cust['BillingCurrency'] = $items[$k]['Waers'] ? $items[$k]['Waers'] : 'IDR';
                 $cust['FirstName'] = $items[$k]['CpNameFirst'] ? $items[$k]['CpNameFirst'] : '-';
@@ -26,6 +28,8 @@ class BP_Postcus
             }
         } else {
             foreach ($items as $k => $v) {
+                $office = $this->get_office_code($items[$k]['Vkbur'], $items[$k]['Vkorg']);
+
                 if ($items[$k]['Kunnr'] == $code) {
                     $cust['Code'] = $items[$k]['Kunnr'];
                     $cust['Name'] = $items[$k]['NameOrg1'] . ' ' . $items[$k]['NameOrg2'];
@@ -35,8 +39,8 @@ class BP_Postcus
                     $cust['CountryCode'] = $items[$k]['Land1'] ? $items[$k]['Land1'] : 'ID';
                     $cust['Number'] = $items[$k]['Telfx'] ? $items[$k]['Telfx'] : '-';
                     $cust['Email'] = $items[$k]['SmtpAddr'] ? $items[$k]['SmtpAddr'] : '-';
-                    $cust['OfficeCode'] = $items[$k]['Vkbur'] ? $items[$k]['Vkbur'] : 'CKIB';  //CKIB is default for testing
-                    $cust['OfficeName'] = $items[$k]['VkburName'] ? $items[$k]['VkburName'] : 'Iron Bird Jakarta'; //Iron Bird Jakarta is default for testing
+                    $cust['OfficeCode'] = $office['code'] ? $office['code'] : 'SYIT';
+                    $cust['OfficeName'] = $office['name'] ? $office['name'] : 'IRON BIRD TRANSPORT JAKARTA';
                     $cust['CreditTerm'] = $items[$k]['Zterm'] ? $items[$k]['Zterm'] : '0';
                     $cust['BillingCurrency'] = $items[$k]['Waers'] ? $items[$k]['Waers'] : 'IDR';
                     $cust['FirstName'] = $items[$k]['CpNameFirst'] ? $items[$k]['CpNameFirst'] : '-';
@@ -101,8 +105,8 @@ class BP_Postcus
             '</PartyTypes>' .
             '<Offices>' .
             '<Office>' .
-            '<Code>CKIB</Code>' .
-            '<Name>Iron Bird Jakarta</Name>' .
+            '<Code>' . $data['OfficeCode'] . '</Code>' .
+            '<Name>' . $data['OfficeName'] . '</Name>' .
             '<BillingCurrency>' . $data['BillingCurrency'] . '</BillingCurrency>' .
             '<CreditTerm>' . $data['CreditTerm'] . '</CreditTerm>' .
             '</Office>' .
@@ -156,6 +160,8 @@ class BP_Postcus
         $items = $data['message']['YfiCustomer']['item'];
         if ($code == '') {
             foreach ($items as $k => $v) {
+                $office = $this->get_office_code($items[$k]['Vkbur'], $items[$k]['Vkorg']);
+
                 $cust['code'] = $items[$k]['Kunnr'];
                 $cust['name'] = $items[$k]['NameOrg1'] . ' ' . $items[$k]['NameOrg2'];
                 $cust['address'] = $items[$k]['Stras'] ? $items[$k]['Stras'] : '-';
@@ -165,7 +171,7 @@ class BP_Postcus
                 $cust['phone'] = $items[$k]['Telfx'] ? $items[$k]['Telfx'] : '-';
                 $cust['email'] = $items[$k]['SmtpAddr'] ? $items[$k]['SmtpAddr'] : '-';
                 $cust['npwp'] = $items[$k]['Stcd1'] ? $items[$k]['Stcd1'] : '-';
-                $cust['office_code'] = $items[$k]['Vkbur'] ? $items[$k]['Vkbur'] : 'CKIB';  //CKIB is default for testing
+                $cust['office_code'] = $office['code'] ? $office['code'] : 'SYIT';
                 $cust['credit_term'] = $items[$k]['Zterm'] ? $items[$k]['Zterm'] : '0';
                 $cust['currency'] = $items[$k]['Waers'] ? $items[$k]['Waers'] : 'IDR';
                 $cust['contact_person'] = $items[$k]['CpNameFirst'] ? $items[$k]['CpNameFirst'] . ' ' . $items[$k]['CpNameLast'] : '-';
@@ -175,6 +181,8 @@ class BP_Postcus
             }
         } else {
             foreach ($items as $k => $v) {
+                $office = $this->get_office_code($items[$k]['Vkbur'], $items[$k]['Vkorg']);
+
                 if ($items[$k]['Kunnr'] == $code) {
                     $cust['code'] = $items[$k]['Kunnr'];
                     $cust['name'] = $items[$k]['NameOrg1'] . ' ' . $items[$k]['NameOrg2'];
@@ -185,7 +193,7 @@ class BP_Postcus
                     $cust['phone'] = $items[$k]['Telfx'] ? $items[$k]['Telfx'] : '-';
                     $cust['email'] = $items[$k]['SmtpAddr'] ? $items[$k]['SmtpAddr'] : '-';
                     $cust['npwp'] = $items[$k]['Stcd1'] ? $items[$k]['Stcd1'] : '-';
-                    $cust['office_code'] = $items[$k]['Vkbur'] ? $items[$k]['Vkbur'] : 'CKIB';  //CKIB is default for testing
+                    $cust['office_code'] = $office['code'] ? $office['code'] : 'SYIT';
                     $cust['credit_term'] = $items[$k]['Zterm'] ? $items[$k]['Zterm'] : '0';
                     $cust['currency'] = $items[$k]['Waers'] ? $items[$k]['Waers'] : 'IDR';
                     $cust['contact_person'] = $items[$k]['CpNameFirst'] ? $items[$k]['CpNameFirst'] . ' ' . $items[$k]['CpNameLast'] : '-';
@@ -204,5 +212,12 @@ class BP_Postcus
         $CI->db->select('access_token');
         $rc = $CI->db->get_where('tb_token')->row_array();
         return $rc['access_token'];
+    }
+
+    public function get_office_code($sap, $entity)
+    {
+        $CI = &get_instance();
+        $CI->db->select('code, name');
+        return $CI->db->get_where('tb_map_office', ['sap_code' => $sap, 'entity' => $entity])->row_array();
     }
 }

@@ -163,6 +163,16 @@ class Midware_Model extends CI_Model
             ->update('tb_interfaces', $detail);
     }
 
+    public function update_tb_interface2($code, $messages)
+    {
+        $detail = array(
+            'proTime'       => date('Y-m-d H:i:s'),
+            'messages'      => $messages
+        );
+        $this->db->where('code', $code)
+            ->update('tb_interfaces', $detail);
+    }
+
     public function insert_tb_success($code, $JMessages, $type)
     {
         $detail = array(
@@ -193,6 +203,12 @@ class Midware_Model extends CI_Model
                         WHERE a.id='$id'
                         ";
         return $this->db->query($qrSql)->row_array();
+    }
+
+    public function get_office_code($sap, $entity)
+    {
+        $this->db->select('code, name');
+        return $this->db->get_where('tb_map_office', ['sap_code' => $sap, 'entity' => $entity])->row_array();
     }
 
     public function delete($id)
