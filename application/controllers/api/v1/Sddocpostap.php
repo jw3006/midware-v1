@@ -54,9 +54,9 @@ class Sddocpostap extends REST_Controller
             $params = $this->sd_postap->_array_sap1($data);
         }
 
-        print_r($params);
+        //print_r($params);
 
-        /* $code   = $data['Invoices']['InvoiceInfo']['InvoiceNo'];
+        $code   = $data['Invoices']['InvoiceInfo']['InvoiceNo'];
         $frontend_text  = json_encode($data, true);
         $backend_text   = json_encode($params, true);
 
@@ -127,6 +127,6 @@ class Sddocpostap extends REST_Controller
                     $this->midware_model->insert_tb_interface($code, $JMessages, $frontend_text, $backend_text, $type, $mode);
                 }
             }
-        } */
+        }
     }
 }

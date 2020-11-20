@@ -13,9 +13,13 @@ class SD_Postap
         if ($inv_type !== 'CashExpense') {
             $Lifnr = $data['Invoices']['InvoiceInfo']['Vendor']['Code'];
             $RefKey1 = '31';
+            $key_code = 'Any';
+            $Zuonr = $data['Invoices']['InvoiceInfo']['JobSummary']['JobSummaryInfo']['JobNumber'];
         } else {
             $Lifnr = '';
             $RefKey1 = '50';
+            $key_code = $data['Invoices']['InvoiceInfo']['Vendor']['Code'];
+            $Zuonr = $data['Invoices']['InvoiceInfo']['JobSummary']['JobSummaryInfo']['JobNumber'];
         }
 
         //==========Detail Cost AP ==================================================
@@ -32,9 +36,9 @@ class SD_Postap
 
             $cc['CompanyCode'] = $office_code; //sample
             $cc['OfficeCode'] = $data['Invoices']['InvoiceInfo']['Office']; //sample
-            $cc['ServiceCode'] = $data['Invoices']['InvoiceInfo']['JobSummary']['JobSummaryInfo']['JobType']; //sample
-            $cc['DeptCode'] = $data['Invoices']['InvoiceInfo']['Vendor']['Code']; //sample
-            $cc['VehicleCode'] = 'Box'; //sample
+            $cc['ServiceCode'] = $data['Invoices']['InvoiceInfo']['JobSummary']['JobSummaryInfo']['ServiceClassCode']; //sample
+            $cc['KeyCode'] = $key_code; //sample
+            $cc['VehicleCode'] = $this->_vehicle_type('TRAILER FL10'); //sample
             $cost_center = $this->_cost_center($cc);
 
             if ($data['Invoices']['InvoiceInfo']['AmountSummary']['BillingInvoiceCurrency'] == 'IDR') {
@@ -59,7 +63,7 @@ class SD_Postap
                 'Valut'         => nice_date($data['Invoices']['InvoiceInfo']['PostedOn'], 'Y-m-d'),
                 'Prctr'         => '',
                 'Kostl'         => $cost_center,
-                'Zuonr'         => $data['Invoices']['InvoiceInfo']['JobSummary']['JobSummaryInfo']['JobNumber'],
+                'Zuonr'         => $Zuonr,
                 'Sgtxt'         => substr($items_ap[$k]['ChargeDescription'], 0, 50),
                 'Shkzg'         => 'S',
                 'Lifnr'         => '',
@@ -117,7 +121,7 @@ class SD_Postap
                     'Valut'         => nice_date($data['Invoices']['InvoiceInfo']['PostedOn'], 'Y-m-d'),
                     'Prctr'         => '',
                     'Kostl'         => '',
-                    'Zuonr'         => $data['Invoices']['InvoiceInfo']['JobSummary']['JobSummaryInfo']['JobNumber'],
+                    'Zuonr'         => $Zuonr,
                     'Sgtxt'         => '',
                     'Shkzg'         => 'S',
                     'Lifnr'         => '',
@@ -172,7 +176,7 @@ class SD_Postap
             'Valut'         => nice_date($data['Invoices']['InvoiceInfo']['PostedOn'], 'Y-m-d'),
             'Prctr'         => '',
             'Kostl'         => '',
-            'Zuonr'         => $data['Invoices']['InvoiceInfo']['JobSummary']['JobSummaryInfo']['JobNumber'],
+            'Zuonr'         => $Zuonr,
             'Sgtxt'         => '',
             'Shkzg'         => 'H',
             'Lifnr'         => $Lifnr,
@@ -230,9 +234,13 @@ class SD_Postap
         if ($inv_type !== 'CashExpense') {
             $Lifnr = $data['Invoices']['InvoiceInfo']['Vendor']['Code'];
             $RefKey1 = '31';
+            $key_code = 'Any';
+            $Zuonr = $data['Invoices']['InvoiceInfo']['JobSummary']['JobSummaryInfo']['JobNumber'];
         } else {
             $Lifnr = '';
             $RefKey1 = '50';
+            $key_code = $data['Invoices']['InvoiceInfo']['Vendor']['Code'];
+            $Zuonr = $data['Invoices']['InvoiceInfo']['JobSummary']['JobSummaryInfo']['JobNumber'];
         }
 
         $office_code = $this->_office_code($data['Invoices']['InvoiceInfo']['Office']);
@@ -244,9 +252,9 @@ class SD_Postap
 
         $cc['CompanyCode'] = $office_code; //sample
         $cc['OfficeCode'] = $data['Invoices']['InvoiceInfo']['Office']; //sample
-        $cc['ServiceCode'] = $data['Invoices']['InvoiceInfo']['JobSummary']['JobSummaryInfo']['JobType']; //sample
-        $cc['DeptCode'] = $data['Invoices']['InvoiceInfo']['Vendor']['Code']; //sample
-        $cc['VehicleCode'] = 'Box'; //sample
+        $cc['ServiceCode'] = $data['Invoices']['InvoiceInfo']['JobSummary']['JobSummaryInfo']['ServiceClassCode']; //sample
+        $cc['KeyCode'] = $key_code; //sample
+        $cc['VehicleCode'] = $this->_vehicle_type('TRAILER FL10');
         $cost_center = $this->_cost_center($cc);
 
         if ($data['Invoices']['InvoiceInfo']['AmountSummary']['BillingInvoiceCurrency'] == 'IDR') {
@@ -272,7 +280,7 @@ class SD_Postap
             'Valut'         => nice_date($data['Invoices']['InvoiceInfo']['PostedOn'], 'Y-m-d'),
             'Prctr'         => '',
             'Kostl'         => $cost_center,
-            'Zuonr'         => $data['Invoices']['InvoiceInfo']['JobSummary']['JobSummaryInfo']['JobNumber'],
+            'Zuonr'         => $Zuonr,
             'Sgtxt'         => substr($items_ap['ChargeDescription'], 0, 50),
             'Shkzg'         => 'S',
             'Lifnr'         => '',
@@ -327,7 +335,7 @@ class SD_Postap
                 'Valut'         => nice_date($data['Invoices']['InvoiceInfo']['PostedOn'], 'Y-m-d'),
                 'Prctr'         => '',
                 'Kostl'         => '',
-                'Zuonr'         => $data['Invoices']['InvoiceInfo']['JobSummary']['JobSummaryInfo']['JobNumber'],
+                'Zuonr'         => $Zuonr,
                 'Sgtxt'         => '',
                 'Shkzg'         => 'S',
                 'Lifnr'         => '',
@@ -381,7 +389,7 @@ class SD_Postap
             'Valut'         => nice_date($data['Invoices']['InvoiceInfo']['PostedOn'], 'Y-m-d'),
             'Prctr'         => '',
             'Kostl'         => $cost_center,
-            'Zuonr'         => $data['Invoices']['InvoiceInfo']['JobSummary']['JobSummaryInfo']['JobNumber'],
+            'Zuonr'         => $Zuonr,
             'Sgtxt'         => '',
             'Shkzg'         => 'H',
             'Lifnr'         => $Lifnr,
@@ -438,12 +446,20 @@ class SD_Postap
         return $offc['entity'];
     }
 
+    public function _vehicle_type($type)
+    {
+        $CI = &get_instance();
+        $CI->db->select('category');
+        $vtype = $CI->db->get_where('tb_map_vehicle', ['code' => $type])->row_array();
+
+        return $vtype['category'];
+    }
+
     public function _cost_center($cc)
     {
         $CI = &get_instance();
-        $CI->db->select('profit_cost');
-        $rc = $CI->db->get_where('tb_map_pc', ['office_code' => $cc['OfficeCode'], 'service_code' => $cc['ServiceCode'], 'material_code' => $cc['DeptCode'], 'vehicle_type' => $cc['VehicleCode'], 'type' => 'CC'])->row_array();
-        return $rc['profit_cost'];
-        //return "PSHIT00F05"; //for dummy
+        $CI->db->select('cost_center');
+        $rc = $CI->db->get_where('tb_map_pc', ['office_code' => $cc['OfficeCode'], 'service_code' => $cc['ServiceCode'], 'material_code' => $cc['KeyCode'], 'vehicle_type' => $cc['VehicleCode']])->row_array();
+        return $rc['cost_center'];
     }
 }

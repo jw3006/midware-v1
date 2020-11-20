@@ -25,9 +25,13 @@ class Interface_Model extends CI_Model
         return $this->db->get_where('tb_interfaces', ['interfaces' => $mode, 'descriptions' => $code])->result();
     }
 
-    public function get_profitcost($id)
+    public function get_profitcost($type)
     {
-        return $this->db->get_where('tb_map_pc', ['type' => $id])->result();
+        if ($type == 'CC') {
+            return $this->db->get_where('tb_map_pc')->result();
+        } else {
+            return $this->db->get_where('tb_map_pc', ['material_code' => 'Any'])->result();
+        }
     }
 
     public function get_office_code()
@@ -48,13 +52,18 @@ class Interface_Model extends CI_Model
 
     public function get_vehicle()
     {
+        $this->db->group_by('category');
         return $this->db->get('tb_map_vehicle')->result();
     }
 
-    public function get_pc($id)
+    public function get_pc($type)
     {
-        $this->db->where('type', $id);
-        return $this->db->get('tb_map_profitcost')->result();
+        if ($type == 'CC') {
+            return $this->db->get('tb_map_profitcost')->result();
+        } else {
+            $this->db->group_by('profit_center');
+            return $this->db->get('tb_map_profitcost')->result();
+        }
     }
 
     public function get_customer($cus = '')

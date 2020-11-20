@@ -8,11 +8,6 @@ class SD_Postar
         $Period     = substr($data['Invoices']['InvoiceInfo']['ApprovedOn'], 4, 2);
         $items_ar = $data['Invoices']['InvoiceInfo']['Charges']['ChargeInfo'];
         $ck_vat = count($data['Invoices']['InvoiceInfo']['AmountSummary']['TaxSummary']);
-        if (count($data['Invoices']['InvoiceInfo']['Remarks']) > 0) {
-            $remarks = $data['Invoices']['InvoiceInfo']['Remarks'];
-        } else {
-            $remarks = $data['Invoices']['InvoiceInfo']['JobSummary']['JobSummaryInfo']['JobNumber'];
-        }
 
         $office_code = $this->_office_code($data['Invoices']['InvoiceInfo']['Office']);
         if ($office_code == 'IBTO') {
@@ -21,10 +16,19 @@ class SD_Postar
             $doc_type = 'ZT';
         }
 
+        if (array_key_exists(1, $data['Invoices']['InvoiceInfo']['JobSummary']['JobSummaryInfo']) > 0) {
+            $ServiceCode = $data['Invoices']['InvoiceInfo']['JobSummary']['JobSummaryInfo'][0]['ServiceClassCode'];
+            $remarks = $data['Invoices']['InvoiceInfo']['JobSummary']['JobSummaryInfo'][0]['JobNumber'];
+        } else {
+            $ServiceCode = $data['Invoices']['InvoiceInfo']['JobSummary']['JobSummaryInfo']['ServiceClassCode'];
+            $remarks = $data['Invoices']['InvoiceInfo']['JobSummary']['JobSummaryInfo']['JobNumber'];
+        }
+
         $cc['CompanyCode'] = $office_code; //sample
         $cc['OfficeCode']  = $data['Invoices']['InvoiceInfo']['Office']; //sample
-        $cc['ServiceCode'] = $data['Invoices']['InvoiceInfo']['JobSummary']['JobSummaryInfo']['JobType']; //sample
-        $cc['VehicleCode'] = 'Box'; //sample
+        $cc['ServiceCode'] = $ServiceCode; //sample
+        $cc['KeyCode'] = 'Any'; //sample
+        $cc['VehicleCode'] = $this->_vehicle_type($data['Invoices']['InvoiceInfo']['Charges']['ChargeInfo'][0]['AllotToType']);
         $profit_center = $this->_profit_center($cc);
 
 
@@ -51,7 +55,7 @@ class SD_Postar
             'Valut'         => nice_date($data['Invoices']['InvoiceInfo']['ApprovedOn'], 'Y-m-d'),
             'Prctr'         => '',
             'Kostl'         => '',
-            'Zuonr'         => $data['Invoices']['InvoiceInfo']['JobSummary']['JobSummaryInfo']['JobNumber'],
+            'Zuonr'         => $data['Invoices']['InvoiceInfo']['InvoiceNo'],
             'Sgtxt'         => $remarks,
             'Shkzg'         => 'S',
             'Lifnr'         => '',
@@ -107,7 +111,7 @@ class SD_Postar
                 'Valut'         => nice_date($data['Invoices']['InvoiceInfo']['ApprovedOn'], 'Y-m-d'),
                 'Prctr'         => $profit_center,
                 'Kostl'         => '',
-                'Zuonr'         => $data['Invoices']['InvoiceInfo']['JobSummary']['JobSummaryInfo']['JobNumber'],
+                'Zuonr'         => $data['Invoices']['InvoiceInfo']['InvoiceNo'],
                 'Sgtxt'         => substr($items_ar[$k]['ChargeDescription'], 0, 50),
                 'Shkzg'         => 'H',
                 'Lifnr'         => '',
@@ -164,8 +168,8 @@ class SD_Postar
                     'Valut'         => nice_date($data['Invoices']['InvoiceInfo']['ApprovedOn'], 'Y-m-d'),
                     'Prctr'         => '',
                     'Kostl'         => '',
-                    'Zuonr'         => $data['Invoices']['InvoiceInfo']['JobSummary']['JobSummaryInfo']['JobNumber'],
-                    'Sgtxt'         => '',
+                    'Zuonr'         => $data['Invoices']['InvoiceInfo']['InvoiceNo'],
+                    'Sgtxt'         => $remarks,
                     'Shkzg'         => 'H',
                     'Lifnr'         => '',
                     'Kunnr'         => '',
@@ -219,11 +223,6 @@ class SD_Postar
         $Period     = substr($data['Invoices']['InvoiceInfo']['ApprovedOn'], 4, 2);
         $items_ar = $data['Invoices']['InvoiceInfo']['Charges']['ChargeInfo'];
         $ck_vat = count($data['Invoices']['InvoiceInfo']['AmountSummary']['TaxSummary']);
-        if (count($data['Invoices']['InvoiceInfo']['Remarks']) > 0) {
-            $remarks = $data['Invoices']['InvoiceInfo']['Remarks'];
-        } else {
-            $remarks = $data['Invoices']['InvoiceInfo']['JobSummary']['JobSummaryInfo']['JobNumber'];
-        }
 
         $office_code = $this->_office_code($data['Invoices']['InvoiceInfo']['Office']);
         if ($office_code == 'IBTO') {
@@ -232,10 +231,19 @@ class SD_Postar
             $doc_type = 'ZT';
         }
 
+        if (array_key_exists(1, $data['Invoices']['InvoiceInfo']['JobSummary']['JobSummaryInfo']) > 0) {
+            $ServiceCode = $data['Invoices']['InvoiceInfo']['JobSummary']['JobSummaryInfo'][0]['ServiceClassCode'];
+            $remarks = $data['Invoices']['InvoiceInfo']['JobSummary']['JobSummaryInfo'][0]['JobNumber'];
+        } else {
+            $ServiceCode = $data['Invoices']['InvoiceInfo']['JobSummary']['JobSummaryInfo']['ServiceClassCode'];
+            $remarks = $data['Invoices']['InvoiceInfo']['JobSummary']['JobSummaryInfo']['JobNumber'];
+        }
+
         $cc['CompanyCode'] = $office_code; //sample
         $cc['OfficeCode']  = $data['Invoices']['InvoiceInfo']['Office']; //sample
-        $cc['ServiceCode'] = $data['Invoices']['InvoiceInfo']['JobSummary']['JobSummaryInfo']['JobType']; //sample
-        $cc['VehicleCode'] = 'Box'; //sample
+        $cc['ServiceCode'] = $ServiceCode; //sample
+        $cc['KeyCode'] = 'Any'; //sample
+        $cc['VehicleCode'] = $this->_vehicle_type($data['Invoices']['InvoiceInfo']['Charges']['ChargeInfo']['AllotToType']);
         $profit_center = $this->_profit_center($cc);
 
         if ($data['Invoices']['InvoiceInfo']['AmountSummary']['BillingInvoiceCurrency'] == 'IDR') {
@@ -261,7 +269,7 @@ class SD_Postar
             'Valut'         => nice_date($data['Invoices']['InvoiceInfo']['ApprovedOn'], 'Y-m-d'),
             'Prctr'         => $profit_center,
             'Kostl'         => '',
-            'Zuonr'         => $data['Invoices']['InvoiceInfo']['JobSummary']['JobSummaryInfo']['JobNumber'],
+            'Zuonr'         => $data['Invoices']['InvoiceInfo']['InvoiceNo'],
             'Sgtxt'         => $remarks,
             'Shkzg'         => 'S',
             'Lifnr'         => '',
@@ -313,7 +321,7 @@ class SD_Postar
             'Valut'         => nice_date($data['Invoices']['InvoiceInfo']['ApprovedOn'], 'Y-m-d'),
             'Prctr'         => $profit_center,
             'Kostl'         => '',
-            'Zuonr'         => $data['Invoices']['InvoiceInfo']['JobSummary']['JobSummaryInfo']['JobNumber'],
+            'Zuonr'         => $data['Invoices']['InvoiceInfo']['InvoiceNo'],
             'Sgtxt'         => substr($items_ar['ChargeDescription'], 0, 50),
             'Shkzg'         => 'H',
             'Lifnr'         => '',
@@ -369,7 +377,7 @@ class SD_Postar
                 'Valut'         => nice_date($data['Invoices']['InvoiceInfo']['ApprovedOn'], 'Y-m-d'),
                 'Prctr'         => '',
                 'Kostl'         => '',
-                'Zuonr'         => $data['Invoices']['InvoiceInfo']['JobSummary']['JobSummaryInfo']['JobNumber'],
+                'Zuonr'         => $data['Invoices']['InvoiceInfo']['InvoiceNo'],
                 'Sgtxt'         => '',
                 'Shkzg'         => 'H',
                 'Lifnr'         => '',
@@ -429,12 +437,20 @@ class SD_Postar
         return $offc['entity'];
     }
 
+    public function _vehicle_type($type)
+    {
+        $CI = &get_instance();
+        $CI->db->select('category');
+        $vtype = $CI->db->get_where('tb_map_vehicle', ['code' => $type])->row_array();
+
+        return $vtype['category'];
+    }
+
     public function _profit_center($cc)
     {
         $CI = &get_instance();
-        $CI->db->select('profit_cost');
-        $rc = $CI->db->get_where('tb_map_pc', ['office_code' => $cc['OfficeCode'], 'service_code' => $cc['ServiceCode'], 'vehicle_type' => $cc['VehicleCode'], 'type' => 'PC'])->row_array();
-        return $rc['profit_cost'];
-        //return "PSHIT00F"; //for dummy
+        $CI->db->select('profit_center');
+        $rc = $CI->db->get_where('tb_map_pc', ['office_code' => $cc['OfficeCode'], 'service_code' => $cc['ServiceCode'], 'material_code' => $cc['KeyCode'], 'vehicle_type' => $cc['VehicleCode']])->row_array();
+        return $rc['profit_center'];
     }
 }

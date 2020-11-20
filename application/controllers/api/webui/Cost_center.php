@@ -71,7 +71,7 @@ class Cost_center extends REST_Controller
         $auth = $this->_get_auth();
         if ($auth == true) {
             $data = $this->post();
-            $rows = $this->db->get_where('tb_map_pc', ['office_code' => $data['office_code'], 'service_code' => $data['service_code'], 'material_code' => $data['material_code'], 'vehicle_type' => $data['vehicle_type'], 'type' => 'PC'])->num_rows();
+            $rows = $this->db->get_where('tb_map_pc', ['office_code' => $data['office_code'], 'service_code' => $data['service_code'], 'material_code' => $data['material_code'], 'vehicle_type' => $data['vehicle_type']])->num_rows();
             if ($rows > 0) {
                 $this->response([
                     'status' => 'fail',
@@ -313,7 +313,7 @@ class Cost_center extends REST_Controller
         $auth = $this->_get_auth();
         if ($auth == true) {
             $data = $this->post();
-            $rows = $this->db->get_where('tb_map_profitcost', ['code' => $data['code'], 'type' => $data['type']])->num_rows();
+            $rows = $this->db->get_where('tb_map_profitcost', ['code' => $data['code']])->num_rows();
             if ($rows > 0) {
                 $this->response([
                     'status' => 'fail',
