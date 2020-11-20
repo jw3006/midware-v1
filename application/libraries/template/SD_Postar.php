@@ -24,7 +24,7 @@ class SD_Postar
         $cc['CompanyCode'] = $office_code; //sample
         $cc['OfficeCode']  = $data['Invoices']['InvoiceInfo']['Office']; //sample
         $cc['ServiceCode'] = $data['Invoices']['InvoiceInfo']['JobSummary']['JobSummaryInfo']['JobType']; //sample
-        $cc['VehicleCode'] = 'BOX'; //sample
+        $cc['VehicleCode'] = 'Box'; //sample
         $profit_center = $this->_profit_center($cc);
 
 
@@ -235,7 +235,7 @@ class SD_Postar
         $cc['CompanyCode'] = $office_code; //sample
         $cc['OfficeCode']  = $data['Invoices']['InvoiceInfo']['Office']; //sample
         $cc['ServiceCode'] = $data['Invoices']['InvoiceInfo']['JobSummary']['JobSummaryInfo']['JobType']; //sample
-        $cc['VehicleCode'] = ''; //sample
+        $cc['VehicleCode'] = 'Box'; //sample
         $profit_center = $this->_profit_center($cc);
 
         if ($data['Invoices']['InvoiceInfo']['AmountSummary']['BillingInvoiceCurrency'] == 'IDR') {
@@ -433,8 +433,8 @@ class SD_Postar
     {
         $CI = &get_instance();
         $CI->db->select('profit_cost');
-        $rc = $CI->db->get_where('tb_map_pc', ['office_code' => $cc['OfficeCode'], 'service_code' => $cc['ServiceCode'], 'material_code' => $cc['VehicleCode'], 'type' => 'PC'])->row_array();
-        //return $rc['profit_cost'];
-        return "PSHIT00F"; //for dummy
+        $rc = $CI->db->get_where('tb_map_pc', ['office_code' => $cc['OfficeCode'], 'service_code' => $cc['ServiceCode'], 'vehicle_type' => $cc['VehicleCode'], 'type' => 'PC'])->row_array();
+        return $rc['profit_cost'];
+        //return "PSHIT00F"; //for dummy
     }
 }

@@ -32,6 +32,7 @@ class Cost_center extends REST_Controller
                 $office_code = $this->interface_model->get_office_code();
                 $material = $this->interface_model->get_material();
                 $services = $this->interface_model->get_services();
+                $vehicle = $this->interface_model->get_vehicle();
                 $pc = $this->interface_model->get_pc('CC');
                 $notif = $this->interface_model->get_notif();
             } else {
@@ -40,6 +41,7 @@ class Cost_center extends REST_Controller
                 $office_code = $this->interface_model->get_office_code();
                 $material = $this->interface_model->get_material();
                 $services = $this->interface_model->get_services();
+                $vehicle = $this->interface_model->get_vehicle();
                 $pc = $this->interface_model->get_pc('CC');
                 $notif = $this->interface_model->get_notif();
             }
@@ -52,6 +54,7 @@ class Cost_center extends REST_Controller
                 'oc' => $office_code,
                 'material' => $material,
                 'services' => $services,
+                'vehicle' => $vehicle,
                 'pc' => $pc
             ], REST_Controller::HTTP_OK);
         } else {
@@ -68,7 +71,7 @@ class Cost_center extends REST_Controller
         $auth = $this->_get_auth();
         if ($auth == true) {
             $data = $this->post();
-            $rows = $this->db->get_where('tb_map_pc', ['office_code' => $data['office_code'], 'service_code' => $data['service_code'], 'material_code' => $data['material_code'], 'type' => 'PC'])->num_rows();
+            $rows = $this->db->get_where('tb_map_pc', ['office_code' => $data['office_code'], 'service_code' => $data['service_code'], 'material_code' => $data['material_code'], 'vehicle_type' => $data['vehicle_type'], 'type' => 'PC'])->num_rows();
             if ($rows > 0) {
                 $this->response([
                     'status' => 'fail',
@@ -240,11 +243,48 @@ class Cost_center extends REST_Controller
             if ($rows > 0) {
                 $this->response([
                     'status' => 'fail',
-                    'message' => 'Oops, This Vehicle Code already exists.',
+                    'message' => 'Oops, This Departement Code already exists.',
                     'data' => ''
                 ], REST_Controller::HTTP_BAD_REQUEST);
             } else {
                 $insert = $this->db->insert('tb_map_material', $data);
+                if ($insert) {
+                    $this->response([
+                        'status' => 'success',
+                        'message' => 'The Departement data has been posted.',
+                        'data' => $data
+                    ], REST_Controller::HTTP_OK);
+                } else {
+                    $this->response([
+                        'status' => 'fail',
+                        'message' => 'Oops, Something went wrong!',
+                        'data' => ''
+                    ], REST_Controller::HTTP_BAD_REQUEST);
+                }
+            }
+        } else {
+            $this->response([
+                'status' => 'fail',
+                'message' => 'Authorization has been denied for this request.',
+                'data' => ''
+            ], REST_Controller::HTTP_BAD_REQUEST);
+        }
+    }
+
+    public function vehicle_post()
+    {
+        $auth = $this->_get_auth();
+        if ($auth == true) {
+            $data = $this->post();
+            $rows = $this->db->get_where('tb_map_vehicle', ['code' => $data['code']])->num_rows();
+            if ($rows > 0) {
+                $this->response([
+                    'status' => 'fail',
+                    'message' => 'Oops, This Vehicle Code already exists.',
+                    'data' => ''
+                ], REST_Controller::HTTP_BAD_REQUEST);
+            } else {
+                $insert = $this->db->insert('tb_map_vehicle', $data);
                 if ($insert) {
                     $this->response([
                         'status' => 'success',

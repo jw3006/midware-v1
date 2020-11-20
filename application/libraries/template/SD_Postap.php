@@ -33,7 +33,8 @@ class SD_Postap
             $cc['CompanyCode'] = $office_code; //sample
             $cc['OfficeCode'] = $data['Invoices']['InvoiceInfo']['Office']; //sample
             $cc['ServiceCode'] = $data['Invoices']['InvoiceInfo']['JobSummary']['JobSummaryInfo']['JobType']; //sample
-            $cc['VehicleCode'] = ''; //sample
+            $cc['DeptCode'] = $data['Invoices']['InvoiceInfo']['Vendor']['Code']; //sample
+            $cc['VehicleCode'] = 'Box'; //sample
             $cost_center = $this->_cost_center($cc);
 
             if ($data['Invoices']['InvoiceInfo']['AmountSummary']['BillingInvoiceCurrency'] == 'IDR') {
@@ -244,7 +245,8 @@ class SD_Postap
         $cc['CompanyCode'] = $office_code; //sample
         $cc['OfficeCode'] = $data['Invoices']['InvoiceInfo']['Office']; //sample
         $cc['ServiceCode'] = $data['Invoices']['InvoiceInfo']['JobSummary']['JobSummaryInfo']['JobType']; //sample
-        $cc['VehicleCode'] = 'BOX'; //sample
+        $cc['DeptCode'] = $data['Invoices']['InvoiceInfo']['Vendor']['Code']; //sample
+        $cc['VehicleCode'] = 'Box'; //sample
         $cost_center = $this->_cost_center($cc);
 
         if ($data['Invoices']['InvoiceInfo']['AmountSummary']['BillingInvoiceCurrency'] == 'IDR') {
@@ -440,8 +442,8 @@ class SD_Postap
     {
         $CI = &get_instance();
         $CI->db->select('profit_cost');
-        $rc = $CI->db->get_where('tb_map_pc', ['office_code' => $cc['OfficeCode'], 'service_code' => $cc['ServiceCode'], 'material_code' => $cc['VehicleCode'], 'type' => 'CC'])->row_array();
-        //return $rc['profit_cost'];
-        return "PSHIT00F05"; //for dummy
+        $rc = $CI->db->get_where('tb_map_pc', ['office_code' => $cc['OfficeCode'], 'service_code' => $cc['ServiceCode'], 'material_code' => $cc['DeptCode'], 'vehicle_type' => $cc['VehicleCode'], 'type' => 'CC'])->row_array();
+        return $rc['profit_cost'];
+        //return "PSHIT00F05"; //for dummy
     }
 }

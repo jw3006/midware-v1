@@ -29,16 +29,16 @@ class Profit_center extends REST_Controller
             if ($id == '') {
                 $data = $this->interface_model->get_profitcost('PC');
                 $office_code = $this->interface_model->get_office_code();
-                $material = $this->interface_model->get_material();
                 $services = $this->interface_model->get_services();
+                $vehicle = $this->interface_model->get_vehicle();
                 $pc = $this->interface_model->get_pc('PC');
                 $notif = $this->interface_model->get_notif();
             } else {
                 $this->db->where('id', $id);
                 $data = $this->interface_model->get_profitcost('PC');
                 $office_code = $this->interface_model->get_office_code();
-                $material = $this->interface_model->get_material();
                 $services = $this->interface_model->get_services();
+                $vehicle = $this->interface_model->get_vehicle();
                 $pc = $this->interface_model->get_pc('PC');
                 $notif = $this->interface_model->get_notif();
             }
@@ -49,8 +49,8 @@ class Profit_center extends REST_Controller
                 'data' => $data,
                 'notif' => $notif,
                 'oc' => $office_code,
-                'material' => $material,
                 'services' => $services,
+                'vehicle' => $vehicle,
                 'pc' => $pc
             ], REST_Controller::HTTP_OK);
         } else {
@@ -67,7 +67,7 @@ class Profit_center extends REST_Controller
         $auth = $this->_get_auth();
         if ($auth == true) {
             $data = $this->post();
-            $rows = $this->db->get_where('tb_map_pc', ['office_code' => $data['office_code'], 'service_code' => $data['service_code'], 'material_code' => $data['material_code'], 'type' => 'PC'])->num_rows();
+            $rows = $this->db->get_where('tb_map_pc', ['office_code' => $data['office_code'], 'service_code' => $data['service_code'],  'vehicle_type' => $data['vehicle_type'], 'type' => 'PC'])->num_rows();
             if ($rows > 0) {
                 $this->response([
                     'status' => 'fail',
@@ -230,12 +230,12 @@ class Profit_center extends REST_Controller
         }
     }
 
-    public function materials_post()
+    public function vehicle_post()
     {
         $auth = $this->_get_auth();
         if ($auth == true) {
             $data = $this->post();
-            $rows = $this->db->get_where('tb_map_material', ['code' => $data['code']])->num_rows();
+            $rows = $this->db->get_where('tb_map_vehicle', ['code' => $data['code']])->num_rows();
             if ($rows > 0) {
                 $this->response([
                     'status' => 'fail',
@@ -243,7 +243,7 @@ class Profit_center extends REST_Controller
                     'data' => ''
                 ], REST_Controller::HTTP_BAD_REQUEST);
             } else {
-                $insert = $this->db->insert('tb_map_material', $data);
+                $insert = $this->db->insert('tb_map_vehicle', $data);
                 if ($insert) {
                     $this->response([
                         'status' => 'success',

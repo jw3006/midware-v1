@@ -40,39 +40,100 @@ class Debtor extends CI_Controller
         if ($result['status'] == 'E') {
             print_r($result);
         } else {
-            $items = $result['message']['YfiCustomer']['item'];
-            if ($items[1]) {
-                foreach ($items as $k => $v) {
-                    $office = $this->midware_model->get_office_code($items[$k]['Vkbur'], $items[$k]['Vkorg']);
+            if ($result['message']['Return'] !== 'Data tdk ditemukan') {
+                $items = $result['message']['YfiCustomer']['item'];
+                if ($items[1]) {
+                    foreach ($items as $k => $v) {
+                        $office = $this->midware_model->get_office_code($items[$k]['Vkbur'], $items[$k]['Vkorg']);
 
-                    $cust['Code'] = $items[$k]['Kunnr'];
-                    $cust['Name'] = $items[$k]['NameOrg1'] . ' ' . $items[$k]['NameOrg2'];
-                    $cust['AddressLine'] = $items[$k]['Stras'] ? $items[$k]['Stras'] : '-';
-                    $cust['City'] = $items[$k]['Ort01'] ? $items[$k]['Ort01'] : 'Jakarta';
-                    $cust['ZipCode'] = $items[$k]['Pstlz'] ? $items[$k]['Pstlz'] : '-';
-                    $cust['CountryCode'] = $items[$k]['Land1'] ? $items[$k]['Land1'] : 'ID';
-                    $cust['Number'] = $items[$k]['Telfx'] ? $items[$k]['Telfx'] : '-';
-                    $cust['Email'] = $items[$k]['SmtpAddr'] ? $items[$k]['SmtpAddr'] : '-';
+                        $cust['Code'] = $items[$k]['Kunnr'];
+                        $cust['Name'] = $items[$k]['NameOrg1'] . ' ' . $items[$k]['NameOrg2'];
+                        $cust['AddressLine'] = $items[$k]['Stras'] ? $items[$k]['Stras'] : '-';
+                        $cust['City'] = $items[$k]['Ort01'] ? $items[$k]['Ort01'] : 'Jakarta';
+                        $cust['ZipCode'] = $items[$k]['Pstlz'] ? $items[$k]['Pstlz'] : '-';
+                        $cust['CountryCode'] = $items[$k]['Land1'] ? $items[$k]['Land1'] : 'ID';
+                        $cust['Number'] = $items[$k]['Telfx'] ? $items[$k]['Telfx'] : '-';
+                        $cust['Email'] = $items[$k]['SmtpAddr'] ? $items[$k]['SmtpAddr'] : '-';
+                        $cust['OfficeCode'] = $office['code'] ? $office['code'] : 'SYIT';
+                        $cust['OfficeName'] = $office['name'] ? $office['name'] : 'IRON BIRD TRANSPORT JAKARTA';
+                        $cust['CreditTerm'] = $items[$k]['Zterm'] ? $items[$k]['Zterm'] : '0';
+                        $cust['BillingCurrency'] = $items[$k]['Waers'] ? $items[$k]['Waers'] : 'IDR';
+                        $cust['FirstName'] = $items[$k]['CpNameFirst'] ? $items[$k]['CpNameFirst'] : '-';
+                        $cust['LastName'] = $items[$k]['CpNameLast'] ? $items[$k]['CpNameLast'] : '-';
+
+                        $custs['code'] = $items[$k]['Kunnr'];
+                        $custs['name'] = $items[$k]['NameOrg1'] . ' ' . $items[$k]['NameOrg2'];
+                        $custs['address'] = $items[$k]['Stras'] ? $items[$k]['Stras'] : '-';
+                        $custs['city'] = $items[$k]['Ort01'] ? $items[$k]['Ort01'] : 'Jakarta';
+                        $custs['zip_code'] = $items[$k]['Pstlz'] ? $items[$k]['Pstlz'] : '-';
+                        $custs['country_code'] = $items[$k]['Land1'] ? $items[$k]['Land1'] : 'ID';
+                        $custs['phone'] = $items[$k]['Telfx'] ? $items[$k]['Telfx'] : '-';
+                        $custs['email'] = $items[$k]['SmtpAddr'] ? $items[$k]['SmtpAddr'] : '-';
+                        $custs['npwp'] = $items[$k]['Stcd1'] ? $items[$k]['Stcd1'] : '-';
+                        $custs['office_code'] = $office['code'] ? $office['code'] : 'SYIT';
+                        $custs['credit_term'] = $items[$k]['Zterm'] ? $items[$k]['Zterm'] : '0';
+                        $custs['currency'] = $items[$k]['Waers'] ? $items[$k]['Waers'] : 'IDR';
+                        $custs['contact_person'] = $items[$k]['CpNameFirst'] ? $items[$k]['CpNameFirst'] . ' ' . $items[$k]['CpNameLast'] : '-';
+                        $custs['created'] = date('Y-m-d H:i:s');
+                        $custs['created_by'] = 'bp_postcus';
+                        $cust_array = $custs;
+
+                        $data_sap = $this->bp_postcus->_scm_xml($cust, $code_sap);
+
+                        $Return = json_encode($data_sap, true);
+                        if ($data_sap !== false) {
+                            if ($data_sap['ResponseDetail']['Status'] == 'Fail') {
+                                $JMessages = $data_sap['ResponseDetail']['ErrorDescription'];
+                                $rows = $this->db->get_where('tb_interfaces', ['code' => $cust['Code']])->num_rows();
+                                if ($rows > 0) {
+                                    $this->midware_model->update_tb_interface2($cust['Code'], $JMessages);
+                                } else {
+                                    $this->midware_model->insert_tb_interface($cust['Code'], $JMessages, $Return, $backend_text, $type, $modes);
+                                }
+                            } else {
+                                $this->db->delete('tb_interfaces', array('code' => $cust['Code']));
+                                $this->midware_model->insert_tb_debtor($cust['Code'], $cust_array);
+                            }
+                        } else {
+                            $rows = $this->db->get_where('tb_interfaces', ['code' => $cust['Code']])->num_rows();
+                            if ($rows > 0) {
+                                $this->midware_model->update_tb_interface2($cust['Code'], 'Bad response from SCM API');
+                            } else {
+                                $this->midware_model->insert_tb_interface($cust['Code'], 'Bad response from SCM API', $frontend_text, $backend_text, $type, $modes);
+                            }
+                        }
+                    }
+                } else {
+                    $office = $this->midware_model->get_office_code($items['Vkbur'], $items['Vkorg']);
+
+                    $cust['Code'] = $items['Kunnr'];
+                    $cust['Name'] = $items['NameOrg1'] . ' ' . $items['NameOrg2'];
+                    $cust['AddressLine'] = $items['Stras'] ? $items['Stras'] : '-';
+                    $cust['City'] = $items['Ort01'] ? $items['Ort01'] : 'Jakarta';
+                    $cust['ZipCode'] = $items['Pstlz'] ? $items['Pstlz'] : '-';
+                    $cust['CountryCode'] = $items['Land1'] ? $items['Land1'] : 'ID';
+                    $cust['Number'] = $items['Telfx'] ? $items['Telfx'] : '-';
+                    $cust['Email'] = $items['SmtpAddr'] ? $items['SmtpAddr'] : '-';
                     $cust['OfficeCode'] = $office['code'] ? $office['code'] : 'SYIT';
                     $cust['OfficeName'] = $office['name'] ? $office['name'] : 'IRON BIRD TRANSPORT JAKARTA';
-                    $cust['CreditTerm'] = $items[$k]['Zterm'] ? $items[$k]['Zterm'] : '0';
-                    $cust['BillingCurrency'] = $items[$k]['Waers'] ? $items[$k]['Waers'] : 'IDR';
-                    $cust['FirstName'] = $items[$k]['CpNameFirst'] ? $items[$k]['CpNameFirst'] : '-';
-                    $cust['LastName'] = $items[$k]['CpNameLast'] ? $items[$k]['CpNameLast'] : '-';
+                    $cust['CreditTerm'] = $items['Zterm'] ? $items['Zterm'] : '0';
+                    $cust['BillingCurrency'] = $items['Waers'] ? $items['Waers'] : 'IDR';
+                    $cust['FirstName'] = $items['CpNameFirst'] ? $item['CpNameFirst'] : '-';
+                    $cust['LastName'] = $items['CpNameLast'] ? $items['CpNameLast'] : '-';
 
-                    $custs['code'] = $items[$k]['Kunnr'];
-                    $custs['name'] = $items[$k]['NameOrg1'] . ' ' . $items[$k]['NameOrg2'];
-                    $custs['address'] = $items[$k]['Stras'] ? $items[$k]['Stras'] : '-';
-                    $custs['city'] = $items[$k]['Ort01'] ? $items[$k]['Ort01'] : 'Jakarta';
-                    $custs['zip_code'] = $items[$k]['Pstlz'] ? $items[$k]['Pstlz'] : '-';
-                    $custs['country_code'] = $items[$k]['Land1'] ? $items[$k]['Land1'] : 'ID';
-                    $custs['phone'] = $items[$k]['Telfx'] ? $items[$k]['Telfx'] : '-';
-                    $custs['email'] = $items[$k]['SmtpAddr'] ? $items[$k]['SmtpAddr'] : '-';
-                    $custs['npwp'] = $items[$k]['Stcd1'] ? $items[$k]['Stcd1'] : '-';
+                    $custs['code'] = $items['Kunnr'];
+                    $custs['name'] = $items['NameOrg1'] . ' ' . $items['NameOrg2'];
+                    $custs['address'] = $items['Stras'] ? $items['Stras'] : '-';
+                    $custs['city'] = $items['Ort01'] ? $items['Ort01'] : 'Jakarta';
+                    $custs['zip_code'] = $items['Pstlz'] ? $items['Pstlz'] : '-';
+                    $custs['country_code'] = $items['Land1'] ? $items['Land1'] : 'ID';
+                    $custs['phone'] = $items['Telfx'] ? $items['Telfx'] : '-';
+                    $custs['email'] = $items['SmtpAddr'] ? $items['SmtpAddr'] : '-';
+                    $custs['npwp'] = $items['Stcd1'] ? $items['Stcd1'] : '-';
                     $custs['office_code'] = $office['code'] ? $office['code'] : 'SYIT';
-                    $custs['credit_term'] = $items[$k]['Zterm'] ? $items[$k]['Zterm'] : '0';
-                    $custs['currency'] = $items[$k]['Waers'] ? $items[$k]['Waers'] : 'IDR';
-                    $custs['contact_person'] = $items[$k]['CpNameFirst'] ? $items[$k]['CpNameFirst'] . ' ' . $items[$k]['CpNameLast'] : '-';
+                    $custs['credit_term'] = $items['Zterm'] ? $items['Zterm'] : '0';
+                    $custs['currency'] = $items['Waers'] ? $items['Waers'] : 'IDR';
+                    $custs['contact_person'] = $items['CpNameFirst'] ? $items['CpNameFirst'] . ' ' . $items['CpNameLast'] : '-';
                     $custs['created'] = date('Y-m-d H:i:s');
                     $custs['created_by'] = 'bp_postcus';
                     $cust_array = $custs;
@@ -83,6 +144,7 @@ class Debtor extends CI_Controller
                     if ($data_sap !== false) {
                         if ($data_sap['ResponseDetail']['Status'] == 'Fail') {
                             $JMessages = $data_sap['ResponseDetail']['ErrorDescription'];
+
                             $rows = $this->db->get_where('tb_interfaces', ['code' => $cust['Code']])->num_rows();
                             if ($rows > 0) {
                                 $this->midware_model->update_tb_interface2($cust['Code'], $JMessages);
@@ -102,69 +164,11 @@ class Debtor extends CI_Controller
                         }
                     }
                 }
+                //print_r($data_sap);
+                echo "Data has been syncronized";
             } else {
-                $office = $this->midware_model->get_office_code($items['Vkbur'], $items['Vkorg']);
-
-                $cust['Code'] = $items['Kunnr'];
-                $cust['Name'] = $items['NameOrg1'] . ' ' . $items['NameOrg2'];
-                $cust['AddressLine'] = $items['Stras'] ? $items['Stras'] : '-';
-                $cust['City'] = $items['Ort01'] ? $items['Ort01'] : 'Jakarta';
-                $cust['ZipCode'] = $items['Pstlz'] ? $items['Pstlz'] : '-';
-                $cust['CountryCode'] = $items['Land1'] ? $items['Land1'] : 'ID';
-                $cust['Number'] = $items['Telfx'] ? $items['Telfx'] : '-';
-                $cust['Email'] = $items['SmtpAddr'] ? $items['SmtpAddr'] : '-';
-                $cust['OfficeCode'] = $office['code'] ? $office['code'] : 'SYIT';
-                $cust['OfficeName'] = $office['name'] ? $office['name'] : 'IRON BIRD TRANSPORT JAKARTA';
-                $cust['CreditTerm'] = $items['Zterm'] ? $items['Zterm'] : '0';
-                $cust['BillingCurrency'] = $items['Waers'] ? $items['Waers'] : 'IDR';
-                $cust['FirstName'] = $items['CpNameFirst'] ? $item['CpNameFirst'] : '-';
-                $cust['LastName'] = $items['CpNameLast'] ? $items['CpNameLast'] : '-';
-
-                $custs['code'] = $items['Kunnr'];
-                $custs['name'] = $items['NameOrg1'] . ' ' . $items['NameOrg2'];
-                $custs['address'] = $items['Stras'] ? $items['Stras'] : '-';
-                $custs['city'] = $items['Ort01'] ? $items['Ort01'] : 'Jakarta';
-                $custs['zip_code'] = $items['Pstlz'] ? $items['Pstlz'] : '-';
-                $custs['country_code'] = $items['Land1'] ? $items['Land1'] : 'ID';
-                $custs['phone'] = $items['Telfx'] ? $items['Telfx'] : '-';
-                $custs['email'] = $items['SmtpAddr'] ? $items['SmtpAddr'] : '-';
-                $custs['npwp'] = $items['Stcd1'] ? $items['Stcd1'] : '-';
-                $custs['office_code'] = $office['code'] ? $office['code'] : 'SYIT';
-                $custs['credit_term'] = $items['Zterm'] ? $items['Zterm'] : '0';
-                $custs['currency'] = $items['Waers'] ? $items['Waers'] : 'IDR';
-                $custs['contact_person'] = $items['CpNameFirst'] ? $items['CpNameFirst'] . ' ' . $items['CpNameLast'] : '-';
-                $custs['created'] = date('Y-m-d H:i:s');
-                $custs['created_by'] = 'bp_postcus';
-                $cust_array = $custs;
-
-                $data_sap = $this->bp_postcus->_scm_xml($cust, $code_sap);
-
-                $Return = json_encode($data_sap, true);
-                if ($data_sap !== false) {
-                    if ($data_sap['ResponseDetail']['Status'] == 'Fail') {
-                        $JMessages = $data_sap['ResponseDetail']['ErrorDescription'];
-
-                        $rows = $this->db->get_where('tb_interfaces', ['code' => $cust['Code']])->num_rows();
-                        if ($rows > 0) {
-                            $this->midware_model->update_tb_interface2($cust['Code'], $JMessages);
-                        } else {
-                            $this->midware_model->insert_tb_interface($cust['Code'], $JMessages, $Return, $backend_text, $type, $modes);
-                        }
-                    } else {
-                        $this->db->delete('tb_interfaces', array('code' => $cust['Code']));
-                        $this->midware_model->insert_tb_debtor($cust['Code'], $cust_array);
-                    }
-                } else {
-                    $rows = $this->db->get_where('tb_interfaces', ['code' => $cust['Code']])->num_rows();
-                    if ($rows > 0) {
-                        $this->midware_model->update_tb_interface2($cust['Code'], 'Bad response from SCM API');
-                    } else {
-                        $this->midware_model->insert_tb_interface($cust['Code'], 'Bad response from SCM API', $frontend_text, $backend_text, $type, $modes);
-                    }
-                }
+                echo "Data not found";
             }
-            //print_r($data_sap);
-            echo "Data has been syncronized";
         }
     }
 }

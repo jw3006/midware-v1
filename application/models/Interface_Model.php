@@ -46,6 +46,11 @@ class Interface_Model extends CI_Model
         return $this->db->get('tb_map_material')->result();
     }
 
+    public function get_vehicle()
+    {
+        return $this->db->get('tb_map_vehicle')->result();
+    }
+
     public function get_pc($id)
     {
         $this->db->where('type', $id);
